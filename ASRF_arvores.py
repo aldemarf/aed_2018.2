@@ -68,6 +68,14 @@ class TreeNode:
 	def isLeaf(self):
 		return self.leftSon is None and self.rightSon is None
 
+	def sons(self):
+		sons = 0
+		if self.hasLeftSon():
+			sons += 1
+		if self.hasRightSon():
+			sons += 1
+		return sons
+
 	# ### DECORATORS #### #
 	data = property(__getData, __setData)
 	color = property(__getColor, __setColor)
@@ -83,6 +91,9 @@ class BinaryTree:
 		self.__root = None
 		self.__height = 0
 
+	def __str__(self):
+		self.inOrderRecEngine(self.root)
+		return "\n"
 
 	def __getRoot(self):
 		return self.__root
@@ -197,15 +208,14 @@ class BinaryTree:
 			raise RuntimeError("The tree is empty!")
 		else:
 			node = self.root
-			while True:
-				if node is None:
-					raise ValueError("Value not found!")
-				elif value < node.data:
+			while node != None:
+				if value < node.data:
 					node = node.leftSon
 				elif value > node.data:
 					node = node.rightSon
 				else:
 					return node
+			raise ValueError("Value not found!")
 
 
 	def order(self, node=None, method="io"):
@@ -282,7 +292,8 @@ class BinaryTree:
 			node = self.searchValue(value)
 
 		if self.isOnlyRoot():
-			raise ValueError("Root hasn't predecessors!")
+			print("Root hasn't predecessors!")
+			return
 
 		if node.hasLeftSon():
 			return self.maximum(node.leftSon)
@@ -295,7 +306,7 @@ class BinaryTree:
 
 			return node
 
-	def sucessor(self, value=None, node=None):
+	def successor(self, value=None, node=None):
 		if value == None:
 			if node is None:
 				node = self.root
@@ -304,7 +315,8 @@ class BinaryTree:
 			node = self.searchValue(value)
 
 		if self.isOnlyRoot():
-			raise ValueError("Root hasn't sucessors!")
+			print("Root hasn't successors!")
+			return
 
 		if node.hasRightSon():
 			return self.minimum(node.rightSon)
@@ -315,12 +327,65 @@ class BinaryTree:
 				son = node
 				node = node.father
 
-			return node
+			if node is None:
+				print("Node hasn't successors!")
+				return
+			else:
+				return node
 
 
 	def remove(self, value):
 		node = self.searchValue(value)
-		pass
+
+		if node.isLeaf():
+			self.removeNS(node)
+		elif node.sons() == 1:
+			self.removeOS(node)
+		else:
+			self.removeTS(node)
+
+
+	def removeNS(self, node):
+		if node is self.root:
+			self.root = None
+		elif node.data <= node.father.data:
+			node.father.leftSon = None
+		else:
+			node.father.rightSon = None
+		return
+
+	def removeOS(self, node):
+		if node is self.root:
+			if node.hasLeftSon():
+				node.leftSon.father = None
+				self.root = node
+			else:
+				node.rightSon.father = None
+				self.root = node
+		else:
+			if node.hasLeftSon():
+				node.leftSon.father = node.father
+				if node.data <= node.father.data:
+					node.father.leftSon = node.leftSon
+				else:
+					node.father.rightSon = node.leftSon
+			else:
+				node.rightSon.father = node.father
+				if node.data <= node.father.data:
+					node.father.leftSon = node.rightSon
+				else:
+					node.father.rightSon = node.rightSon
+		return
+
+	def removeTS(self, node):
+		predecessor = self.predecessor(node=node)
+		node.data = predecessor.data
+
+		if predecessor.isLeaf():
+			self.removeNS(predecessor)
+		else:
+			self.removeOS(predecessor)
+		return
 
 
 
@@ -330,7 +395,7 @@ class BinaryTree:
 ############### TESTES ###############
 
 def amostras (tamanho):
-	from random import sample, shuffle
+	from random import sample
 	population = list(range(tamanho * 100))
 	amostra = sample(population, tamanho)
 	# print(amostra)
@@ -380,23 +445,36 @@ for _ in range(5):
 	pred = arvore.predecessor(valor)
 	l = pc()
 	predT = l - k
-	suces = arvore.sucessor(valor)
+	suces = arvore.successor(valor)
 	m = pc()
 	sucessT = m - l
+	n = pc()
+	arvore.remove(valor)
+	o = pc()
+	remT = o - n
+	# print("Valor que deveria ser removido : ", arvore.searchValue(valor).data)
+
 
 	print("Root", arvore.root.data)
 	print("Max", max)
 	print("Min", min)
-	print("Predecessor", pred.data)
-	print("Sucessor", suces.data)
+	if pred is not None:
+		print("Predecessor", pred.data)
+	if suces is not None:
+		print("Sucessor", suces.data)
+	print(amostra)
+	print(arvore)
 
 	print("""
-	Criação de amostra : {:.5f}s
-	Insercao de elementos na arvore : {:.5f}s
-	Busca do valor : {:.5f}s
-	Impressao da Arvore : {:.5f}s
-	Maximo da Arvore : {:.5f}s
-	Minimo da Arvore : {:.5f}s
-	Predecessor da Arvore : {:.5f}s
-	Sucessor da Arvore : {:.5f}s
-	""".format(createSampleT, insertT, searchT, orderT, maximoT, minimoT, predT, sucessT))
+Criação de amostra : {:.5f}s
+Insercao de elementos na arvore : {:.5f}s
+Busca do valor : {:.5f}s
+Impressao da Arvore : {:.5f}s
+Maximo da Arvore : {:.5f}s
+Minimo da Arvore : {:.5f}s
+Predecessor da Arvore : {:.5f}s
+Sucessor da Arvore : {:.5f}s
+Remover da Arvore : {:.5f}s
+
+----------------------------------------------
+""".format(createSampleT, insertT, searchT, orderT, maximoT, minimoT, predT, sucessT, remT))
