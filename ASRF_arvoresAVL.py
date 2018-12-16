@@ -7,10 +7,9 @@
 # ALUNO ALDEMAR S R FILHO
 
 
-class TreeNode:
-	def __init__(self, data, color=None, height=None, balance=None):
+class AVLTreeNode:
+	def __init__(self, data, height=None, balance=None):
 		self.__data = data
-		self.__color = color
 		self.__height = height
 		self.__balance = balance
 		self.__father = None
@@ -19,9 +18,6 @@ class TreeNode:
 
 	def __getData(self):
 		return self.__data
-
-	def __getColor(self):
-		return self.__color
 
 	def __getHeight(self):
 		return self.__height
@@ -40,9 +36,6 @@ class TreeNode:
 
 	def __setData(self, data):
 		self.__data = data
-
-	def __setColor(self, color):
-		self.__color = color
 
 	def __setHeight(self, height):
 		self.__height = height
@@ -78,7 +71,6 @@ class TreeNode:
 
 	# ### DECORATORS #### #
 	data = property(__getData, __setData)
-	color = property(__getColor, __setColor)
 	height = property(__getHeight, __setHeight)
 	balance = property(__getBalance, __setBalance)
 	father = property(__getFather, __setFather)
@@ -86,10 +78,11 @@ class TreeNode:
 	leftSon = property(__getLeftSon, __setLeftSon)
 
 
-class BinaryTree:
+class AVLTree:
 	def __init__(self):
 		self.__root = None
 		self.__height = 0
+		self.__balanceFactor = 0
 
 	def __str__(self):
 		self.inOrderRecEngine(self.root)
@@ -110,6 +103,32 @@ class BinaryTree:
 	def __setHeight(self, height):
 		self.__height = height
 
+
+	def calculateHeight(self, node=None):
+		if node is None:
+			node = self.root
+		else:
+
+			if node is None:
+				return -1
+			else:
+				leftHeight = self.calculateHeight(node.leftSon)
+				rightHeight = self.calculateHeight(node.rightSon)
+
+				if leftHeight >= rightHeight:
+					node.height = leftHeight
+					return (1 + leftHeight)
+				else:
+					node.height = rightHeight
+					return (1 + rightHeight)
+
+
+	def calculateBalanceFactor(self, node):
+		if node.isLeaf():
+			return 0
+		else:
+			node.
+
 	def isEmpty(self):
 		if self.root is None:
 			return True
@@ -124,7 +143,7 @@ class BinaryTree:
 
 
 	def insertNode(self, value):
-		newNode = TreeNode(value)
+		newNode = AVLTreeNode(value)
 		node = self.root
 		father = None
 
@@ -169,7 +188,7 @@ class BinaryTree:
 			else:
 				self.insertNodeRec(value, node.rightSon, node)
 		else:
-			newNode = TreeNode(value)
+			newNode = AVLTreeNode(value)
 			newNode.father = father
 
 			if father is not None:
@@ -410,7 +429,7 @@ for _ in range(5):
 	b = pc()
 	createSampleT = b - a
 
-	arvore = BinaryTree()
+	arvore = AVLTree()
 	c = pc()
 
 	for item in amostra:
