@@ -11,7 +11,7 @@ class AVLTreeNode:
 	def __init__(self, data, height=None, balance=None):
 		self.__data = data
 		self.__height = height
-		self.__balance = balance
+		self.__balanceFactor = balance
 		self.__father = None
 		self.__rightSon = None
 		self.__leftSon = None
@@ -23,7 +23,7 @@ class AVLTreeNode:
 		return self.__height
 
 	def __getBalance(self):
-		return self.__balance
+		return self.__balanceFactor
 
 	def __getFather(self):
 		return self.__father
@@ -41,7 +41,7 @@ class AVLTreeNode:
 		self.__height = height
 
 	def __setBalance(self, balance):
-		self.__balance = balance
+		self.__balanceFactor = balance
 
 	def __setFather(self, father):
 		self.__father = father
