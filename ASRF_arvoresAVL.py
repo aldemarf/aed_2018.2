@@ -72,7 +72,7 @@ class AVLTreeNode:
 	# ### DECORATORS #### #
 	data = property(__getData, __setData)
 	height = property(__getHeight, __setHeight)
-	balance = property(__getBalance, __setBalance)
+	balanceFactor = property(__getBalance, __setBalance)
 	father = property(__getFather, __setFather)
 	rightSon = property(__getRightSon, __setRightSon)
 	leftSon = property(__getLeftSon, __setLeftSon)
@@ -81,11 +81,10 @@ class AVLTreeNode:
 class AVLTree:
 	def __init__(self):
 		self.__root = None
-		self.__height = 0
-		self.__balanceFactor = 0
+
 
 	def __str__(self):
-		self.inOrderRecEngine(self.root)
+		self.inOrderRecEngine(self.root, printHeight=False, printBalanceFactor=False)
 		return "\n"
 
 	def __getRoot(self):
@@ -104,30 +103,26 @@ class AVLTree:
 		self.__height = height
 
 
-	def calculateHeight(self, node=None):
+	def calculateHeight(self, node):
 		if node is None:
-			node = self.root
+			return -1
 		else:
-
-			if node is None:
-				return -1
+			leftHeight = self.calculateHeight(node.leftSon)
+			rightHeight = self.calculateHeight(node.rightSon)
+			if leftHeight >= rightHeight:
+				node.height = leftHeight
+				return (1 + leftHeight)
 			else:
-				leftHeight = self.calculateHeight(node.leftSon)
-				rightHeight = self.calculateHeight(node.rightSon)
-
-				if leftHeight >= rightHeight:
-					node.height = leftHeight
-					return (1 + leftHeight)
-				else:
-					node.height = rightHeight
-					return (1 + rightHeight)
+				node.height = rightHeight
+				return (1 + rightHeight)
 
 
 	def calculateBalanceFactor(self, node):
-		if node.isLeaf():
-			return 0
+		if node is None:
+			return -1
 		else:
-			node.
+			node.balanceFactor = self.calculateBalanceFactor(node.leftSon) - self.calculateBalanceFactor(node.rightSon)
+			return node.balanceFactor
 
 	def isEmpty(self):
 		if self.root is None:
@@ -237,16 +232,16 @@ class AVLTree:
 			raise ValueError("Value not found!")
 
 
-	def order(self, node=None, method="io"):
+	def order(self, node=None, method="io", printHeight=False, printBalanceFactor=False):
 		if node is None:
 			node = self.root
 
 		if method.lower() == "io":
-			self.inOrderRecEngine(node)
+			self.inOrderRecEngine(node, printHeight, printBalanceFactor)
 		elif method.lower() == "pre":
-			self.preOrderRecEngine(node)
+			self.preOrderRecEngine(node, printHeight, printBalanceFactor)
 		else:
-			self.posOrderRecEngine(node)
+			self.posOrderRecEngine(node, printHeight, printBalanceFactor)
 
 
 	def inOrderIterEngine(self, node):
@@ -262,23 +257,35 @@ class AVLTree:
 		pass
 
 
-	def inOrderRecEngine(self, node):
+	def inOrderRecEngine(self, node, printHeight, printBalanceFactor):
 		if node is not None:
-			self.inOrderRecEngine(node.leftSon)
+			self.inOrderRecEngine(node.leftSon, printHeight, printBalanceFactor)
 			print(node.data,end=" ")
-			self.inOrderRecEngine(node.rightSon)
+			if printHeight:
+				print(node.height, end= " ")
+			if printBalanceFactor:
+				print(node.balanceFactor, end=" ")
+			self.inOrderRecEngine(node.rightSon, printHeight, printBalanceFactor)
 
-	def preOrderRecEngine(self, node):
+	def preOrderRecEngine(self, node, printHeight, printBalanceFactor):
 		if node is not None:
 			print(node.data,end=" ")
-			self.inOrderRecEngine(node.leftSon)
-			self.inOrderRecEngine(node.rightSon)
+			if printHeight:
+				print(node.height, end= " ")
+			if printBalanceFactor:
+				print(node.balanceFactor, end=" ")
+			self.inOrderRecEngine(node.leftSon, printHeight, printBalanceFactor)
+			self.inOrderRecEngine(node.rightSon, printHeight, printBalanceFactor)
 
-	def posOrderRecEngine(self, node):
+	def posOrderRecEngine(self, node, printHeight, printBalanceFactor):
 		if node is not None:
-			self.inOrderRecEngine(node.leftSon)
-			self.inOrderRecEngine(node.rightSon)
+			self.inOrderRecEngine(node.leftSon, printHeight, printBalanceFactor)
+			self.inOrderRecEngine(node.rightSon, printHeight, printBalanceFactor)
 			print(node.data,end=" ")
+			if printHeight:
+				print(node.height, end= " ")
+			if printBalanceFactor:
+				print(node.balanceFactor, end=" ")
 
 	def maximum(self, node=None):
 		if node is None:
@@ -423,77 +430,81 @@ def amostras (tamanho):
 from time import perf_counter as pc
 from random import sample
 
-for _ in range(5):
+for _ in range(1):
 	a = pc()
-	amostra = amostras(20000)
+	amostra = amostras(10)
 	b = pc()
 	createSampleT = b - a
 
-	arvore = AVLTree()
+	arvoreAVL = AVLTree()
 	c = pc()
 
 	for item in amostra:
-		arvore.insertNodeRec(item, arvore.root)
+		arvoreAVL.insertNode(item)
 	d = pc()
 	insertT = d - c
 
-	e = pc()
-	valor, *_ = sample(amostra, 1)
-	e1 = pc()
-	assignT = e1 - e
+	arvoreAVL.calculateHeight(arvoreAVL.root)
+	arvoreAVL.calculateBalanceFactor(arvoreAVL.root)
+	arvoreAVL.order(printBalanceFactor=False, printHeight=True)
 
-	no = arvore.searchValue(valor)
-	f = pc()
-	print(no.data)
-	g = pc()
-	searchT = f - e1
+	# e = pc()
+	# valor, *_ = sample(amostra, 1)
+	# e1 = pc()
+	# assignT = e1 - e
 
-	# arvore.order()
-	# print("\n")
-	h = pc()
-	orderT = h - g
-	i = pc()
-	max = arvore.maximum().data
-	j = pc()
-	maximoT = j - i
+	# no = arvore.searchValue(valor)
+	# f = pc()
+	# print(no.data)
+	# g = pc()
+	# searchT = f - e1
 
-	min = arvore.minimum().data
-	k = pc()
-	minimoT = k - j
+	# # arvore.order()
+	# # print("\n")
+	# h = pc()
+	# orderT = h - g
+	# i = pc()
+	# max = arvore.maximum().data
+	# j = pc()
+	# maximoT = j - i
 
-	pred = arvore.predecessor(valor)
-	l = pc()
-	predT = l - k
-	suces = arvore.successor(valor)
-	m = pc()
-	sucessT = m - l
-	n = pc()
-	arvore.remove(valor)
-	o = pc()
-	remT = o - n
-	# print("Valor que deveria ser removido : ", arvore.searchValue(valor).data)
+	# min = arvore.minimum().data
+	# k = pc()
+	# minimoT = k - j
+
+	# pred = arvore.predecessor(valor)
+	# l = pc()
+	# predT = l - k
+	# suces = arvore.successor(valor)
+	# m = pc()
+	# sucessT = m - l
+	# n = pc()
+	# arvore.remove(valor)
+	# o = pc()
+	# remT = o - n
+	# # print("Valor que deveria ser removido : ", arvore.searchValue(valor).data)
 
 
-	print("Root", arvore.root.data)
-	print("Max", max)
-	print("Min", min)
-	if pred is not None:
-		print("Predecessor", pred.data)
-	if suces is not None:
-		print("Sucessor", suces.data)
-	print(amostra)
-	print(arvore)
+# 	print("Root", arvoreAVL.root.data)
+# 	print("Max", max)
+# 	print("Min", min)
+# 	if pred is not None:
+# 		print("Predecessor", pred.data)
+# 	if suces is not None:
+# 		print("Sucessor", suces.data)
+# 	print(amostra)
+# 	print(arvoreAVL)
 
-	print("""
-Criação de amostra : {:.5f}s
-Insercao de elementos na arvore : {:.5f}s
-Busca do valor : {:.5f}s
-Impressao da Arvore : {:.5f}s
-Maximo da Arvore : {:.5f}s
-Minimo da Arvore : {:.5f}s
-Predecessor da Arvore : {:.5f}s
-Sucessor da Arvore : {:.5f}s
-Remover da Arvore : {:.5f}s
+# 	print("""
+# Criação de amostra : {:.5f}s
+# Insercao de elementos na arvore : {:.5f}s
+# Busca do valor : {:.5f}s
+# Impressao da Arvore : {:.5f}s
+# Maximo da Arvore : {:.5f}s
+# Minimo da Arvore : {:.5f}s
+# Predecessor da Arvore : {:.5f}s
+# Sucessor da Arvore : {:.5f}s
+# Remover da Arvore : {:.5f}s
 
-----------------------------------------------
-""".format(createSampleT, insertT, searchT, orderT, maximoT, minimoT, predT, sucessT, remT))
+# ----------------------------------------------
+# """.format(createSampleT, insertT, searchT, orderT, maximoT, minimoT, predT, sucessT, remT))
