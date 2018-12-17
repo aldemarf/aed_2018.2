@@ -158,6 +158,13 @@ class AVLTree:
 			else:
 				father.rightSon = newNode
 
+		if value > self.root.data:
+			self.calculateHeight(self.root.rightSon)
+		else:
+			self.calculateHeight(self.root.leftSon)
+		return
+
+
 			# node = self.root
 			# while True:
 				# if value <= node.data:
@@ -193,6 +200,12 @@ class AVLTree:
 					father.rightSon = newNode
 			else:
 				self.root = newNode
+
+			if value > self.root.data:
+				self.calculateHeight(self.root.rightSon)
+			else:
+				self.calculateHeight(self.root.leftSon)
+			return
 
 
 		# if self.isEmpty():
@@ -460,6 +473,11 @@ class AVLTree:
 		self.rotateLeft(node)
 		return
 
+	def doubleRotateRight(self, node):
+		self.rotateLeft(node.rightSon)
+		self.rotateRight(node)
+		return
+
 
 ############### MAIN ###############
 
@@ -478,8 +496,8 @@ from random import sample
 
 for _ in range(1):
 	a = pc()
-	amostra = amostras(100000)
-	# amostra = [405, 46, 692, 344, 530, 131, 727, 908, 701, 923]
+	# amostra = amostras(100000)
+	amostra = [405, 46, 692, 344, 530, 131, 727, 908, 701, 923]
 	b = pc()
 	createSampleT = b - a
 
