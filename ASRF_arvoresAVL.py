@@ -116,14 +116,33 @@ class AVLTree:
 				node.height = rightHeight + 1
 				return node.height
 
+	def calculateHeightAscendent(self, node):
+		self.calculateHeight(node)
+
+		while node is not None:
+			if node.leftSon.height > node.rightSon.height:
+				node.height = node.leftSon.height + 1
+			else:
+				node.height = node.rightSon.height + 1
+			node = node.father
+
 
 	def calculateBalanceFactor(self, node):
 		if node is None:
 			return -1
 		else:
 			node.balanceFactor = self.calculateBalanceFactor(node.leftSon) - self.calculateBalanceFactor(node.rightSon)
-			if node.balanceFactor > 1 or node.balanceFactor < -1:
-				return self.rotate(node)
+			return node.height
+
+	def calculateBalanceFactorAscendent(self, node):
+		while node is not None:
+			node.balanceFactor =  node.leftSon.height - node.rightSon.height
+			node = node.father
+
+		if node is None:
+			return -1
+		else:
+
 			return node.height
 
 	def isEmpty(self):
