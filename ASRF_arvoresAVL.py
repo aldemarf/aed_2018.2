@@ -440,8 +440,7 @@ class AVLTree:
 			self.doubleRotateRight(node)
 		else:
 			self.doubleRotateLeft(node)
-
-		return self.calculateBalanceFactor(self.root)
+		return
 
 
 	def rotateLeft(self, node):
@@ -489,23 +488,35 @@ class AVLTree:
 	def doubleRotateLeft(self, node):
 		swap = node.rightSon
 
-		swap.leftSon.father = node
+		# Troca do novo filho direito de "node"
 		node.rightSon = swap.leftSon
+		node.rightSon.father = node
+
+		# Ajuste do ultimo node do subarvore
 		swap.father = node.rightSon
 		swap.leftSon = None
 		swap.rightSon = None
 
-		self.rotateLeft(node)
+		# Ligacao do pai do ultimo node
+		node.rightSon.rightSon = swap
+
+		self.rotateLeft(node) #Rotacao convencional a esquerda
 		return
 
 	def doubleRotateRight(self, node):
 		swap = node.leftSon
 
-		swap.rightSon.father = node
+		# Troca do novo filho direito de "node"
 		node.leftSon = swap.rightSon
+		node.leftSon.father = node
+
+		# Ajuste do ultimo node do subarvore
 		swap.father = node.leftSon
 		swap.leftSon = None
 		swap.rightSon = None
+
+		# Ligacao do pai do ultimo node
+		node.leftSon.leftSon = swap
 
 		self.rotateRight(node)
 		return
