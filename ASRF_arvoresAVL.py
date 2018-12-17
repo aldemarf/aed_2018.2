@@ -455,6 +455,12 @@ class AVLTree:
 			node.father.rightSon = swap
 		return
 
+	def doubleRotateLeft(self, node):
+		self.rotateRight(node.rightSon)
+		self.rotateLeft(node)
+		return
+
+
 ############### MAIN ###############
 
 
