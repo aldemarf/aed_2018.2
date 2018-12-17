@@ -65,7 +65,6 @@ class TreeNode:
 class BinaryTree:
 	def __init__(self):
 		self.__root = None
-		self.__height = 0
 
 	def __str__(self):
 		self.inOrderRecEngine(self.root)
