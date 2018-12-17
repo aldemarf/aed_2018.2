@@ -432,7 +432,7 @@ from random import sample
 
 for _ in range(1):
 	a = pc()
-	amostra = amostras(10)
+	amostra = amostras(100000)
 	# amostra = [405, 46, 692, 344, 530, 131, 727, 908, 701, 923]
 	b = pc()
 	createSampleT = b - a
@@ -445,21 +445,23 @@ for _ in range(1):
 	d = pc()
 	insertT = d - c
 
-	print(amostra)
-	arvoreAVL.calculateHeight(arvoreAVL.root)
-	arvoreAVL.calculateBalanceFactor(arvoreAVL.root)
-	arvoreAVL.order(method="pre",printBalanceFactor=True, printHeight=True)
+	# print(amostra)
 
-	# e = pc()
+
+
+
+	e = pc()
 	# valor, *_ = sample(amostra, 1)
-	# e1 = pc()
-	# assignT = e1 - e
+	arvoreAVL.calculateHeight(arvoreAVL.root)
+	e1 = pc()
+	assignT = e1 - e
 
 	# no = arvore.searchValue(valor)
-	# f = pc()
+	f = pc()
 	# print(no.data)
-	# g = pc()
-	# searchT = f - e1
+	arvoreAVL.calculateBalanceFactor(arvoreAVL.root)
+	g = pc()
+	searchT = g - f
 
 	# # arvore.order()
 	# # print("\n")
@@ -467,6 +469,7 @@ for _ in range(1):
 	# orderT = h - g
 	# i = pc()
 	# max = arvore.maximum().data
+	# arvoreAVL.order(method="pre",printBalanceFactor=False, printHeight=False)
 	# j = pc()
 	# maximoT = j - i
 
@@ -497,7 +500,7 @@ for _ in range(1):
 # 	print(amostra)
 # 	print(arvoreAVL)
 
-# 	print("""
+# print("""
 # Criação de amostra : {:.5f}s
 # Insercao de elementos na arvore : {:.5f}s
 # Busca do valor : {:.5f}s
@@ -510,3 +513,10 @@ for _ in range(1):
 
 # ----------------------------------------------
 # """.format(createSampleT, insertT, searchT, orderT, maximoT, minimoT, predT, sucessT, remT))
+
+print("""
+Insercao de elementos na arvore : {:.5f}s
+Altura dos nodes : {:.5f}s
+Fator de balanceamento : {:.5f}s
+----------------------------------------------
+""".format(insertT, assignT, searchT))
