@@ -433,11 +433,27 @@ class AVLTree:
 			node.father.leftSon = swap
 		else:
 			node.father.rightSon = swap
-
 		return
 
-	def rotateRight(self):
-		pass
+	def rotateRight(self, node):
+		swap = node.leftSon
+
+		## Troca do filho esquerdo de "node" ##
+		swap.rightSon.father = node
+		node.leftSon = swap.rightSon
+		## Troca do pai de "node" ##
+		swap.rightSon = node
+		swap.father = node.father
+		node.father = swap
+
+		## Ajuste do ponteiro do pai de "node" ##
+		if node is self.root:
+			self.root = swap
+		elif node is node.father.leftSon:
+			node.father.leftSon = swap
+		else:
+			node.father.rightSon = swap
+		return
 
 ############### MAIN ###############
 
