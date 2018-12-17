@@ -110,11 +110,11 @@ class AVLTree:
 			leftHeight = self.calculateHeight(node.leftSon)
 			rightHeight = self.calculateHeight(node.rightSon)
 			if leftHeight >= rightHeight:
-				node.height = leftHeight
-				return (1 + leftHeight)
+				node.height = leftHeight + 1
+				return node.height
 			else:
-				node.height = rightHeight
-				return (1 + rightHeight)
+				node.height = rightHeight + 1
+				return node.height
 
 
 	def calculateBalanceFactor(self, node):
@@ -122,7 +122,7 @@ class AVLTree:
 			return -1
 		else:
 			node.balanceFactor = self.calculateBalanceFactor(node.leftSon) - self.calculateBalanceFactor(node.rightSon)
-			return node.balanceFactor
+			return node.height
 
 	def isEmpty(self):
 		if self.root is None:
@@ -433,6 +433,7 @@ from random import sample
 for _ in range(1):
 	a = pc()
 	amostra = amostras(10)
+	# amostra = [405, 46, 692, 344, 530, 131, 727, 908, 701, 923]
 	b = pc()
 	createSampleT = b - a
 
@@ -444,9 +445,10 @@ for _ in range(1):
 	d = pc()
 	insertT = d - c
 
+	print(amostra)
 	arvoreAVL.calculateHeight(arvoreAVL.root)
 	arvoreAVL.calculateBalanceFactor(arvoreAVL.root)
-	arvoreAVL.order(printBalanceFactor=False, printHeight=True)
+	arvoreAVL.order(method="pre",printBalanceFactor=True, printHeight=True)
 
 	# e = pc()
 	# valor, *_ = sample(amostra, 1)
