@@ -245,8 +245,10 @@ class AVLTree:
 
 
 	def inOrderIterEngine(self, node):
+		# from array import array
 		# if node is not None:
 		# 	currentNode = node
+		# 	fila = array('l')
 		# 	while True:
 		# 		if currentNode.hasLeftSon():
 		# 			currentNode = currentNode.leftSon
@@ -413,7 +415,29 @@ class AVLTree:
 			self.removeOS(predecessor)
 		return
 
+	def rotateLeft(self, node):
+		swap = node.rightSon
 
+		## Troca do filho direito de "node" ##
+		swap.leftSon.father = node
+		node.rightSon = swap.leftSon
+		## Troca do pai de "node" ##
+		swap.leftSon = node
+		swap.father = node.father
+		node.father = swap
+
+		## Ajuste do ponteiro do pai de "node" ##
+		if node is self.root:
+			self.root = swap
+		elif node is node.father.leftSon:
+			node.father.leftSon = swap
+		else:
+			node.father.rightSon = swap
+
+		return
+
+	def rotateRight(self):
+		pass
 
 ############### MAIN ###############
 
