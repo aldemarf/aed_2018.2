@@ -122,6 +122,8 @@ class AVLTree:
 			return -1
 		else:
 			node.balanceFactor = self.calculateBalanceFactor(node.leftSon) - self.calculateBalanceFactor(node.rightSon)
+			if node.balanceFactor > 1 or node.balanceFactor < -1:
+				return self.rotate(node)
 			return node.height
 
 	def isEmpty(self):
@@ -428,12 +430,27 @@ class AVLTree:
 			self.removeOS(predecessor)
 		return
 
+
+	def rotate(self, node):
+		if node.hasRightSon() and node.rightSon.hasRightSon():
+			self.rotateLeft(node)
+		elif node.hasLeftSon() and node.leftSon.hasLeftSon():
+			self.rotateRight(node)
+		elif node.hasLeftSon() and node.leftSon.hasRightSon():
+			self.doubleRotateRight(node)
+		else:
+			self.doubleRotateLeft(node)
+
+		return self.calculateBalanceFactor(self.root)
+
+
 	def rotateLeft(self, node):
 		swap = node.rightSon
 
 		## Troca do filho direito de "node" ##
-		swap.leftSon.father = node
-		node.rightSon = swap.leftSon
+		# swap.leftSon.father = node
+		# node.rightSon = swap.rightSon
+
 		## Troca do pai de "node" ##
 		swap.leftSon = node
 		swap.father = node.father
@@ -452,8 +469,9 @@ class AVLTree:
 		swap = node.leftSon
 
 		## Troca do filho esquerdo de "node" ##
-		swap.rightSon.father = node
-		node.leftSon = swap.rightSon
+		# swap.rightSon.father = node
+		# node.leftSon = swap.rightSon
+
 		## Troca do pai de "node" ##
 		swap.rightSon = node
 		swap.father = node.father
@@ -469,12 +487,26 @@ class AVLTree:
 		return
 
 	def doubleRotateLeft(self, node):
-		self.rotateRight(node.rightSon)
+		swap = node.rightSon
+
+		swap.leftSon.father = node
+		node.rightSon = swap.leftSon
+		swap.father = node.rightSon
+		swap.leftSon = None
+		swap.rightSon = None
+
 		self.rotateLeft(node)
 		return
 
 	def doubleRotateRight(self, node):
-		self.rotateLeft(node.rightSon)
+		swap = node.leftSon
+
+		swap.rightSon.father = node
+		node.leftSon = swap.rightSon
+		swap.father = node.leftSon
+		swap.leftSon = None
+		swap.rightSon = None
+
 		self.rotateRight(node)
 		return
 
