@@ -84,66 +84,16 @@ class AVLTree:
 
 
 	def __str__(self):
-		self.inOrderRecEngine(self.root, printHeight=False, printBalanceFactor=False)
+		self.inOrderRecEngine(self.root)
 		return "\n"
 
 	def __getRoot(self):
 		return self.__root
 
 
-	def __getHeight(self):
-		return self.__height
-
-
 	def __setRoot(self, node):
 		self.__root = node
 
-
-	def __setHeight(self, height):
-		self.__height = height
-
-
-	def calculateHeight(self, node):
-		if node is None:
-			return -1
-		else:
-			leftHeight = self.calculateHeight(node.leftSon)
-			rightHeight = self.calculateHeight(node.rightSon)
-			if leftHeight >= rightHeight:
-				node.height = leftHeight + 1
-				return node.height
-			else:
-				node.height = rightHeight + 1
-				return node.height
-
-	def calculateHeightAscendent(self, node):
-		self.calculateHeight(node)
-
-		while node is not None:
-			if node.leftSon.height > node.rightSon.height:
-				node.height = node.leftSon.height + 1
-			else:
-				node.height = node.rightSon.height + 1
-			node = node.father
-
-
-	def calculateBalanceFactor(self, node):
-		if node is None:
-			return -1
-		else:
-			node.balanceFactor = self.calculateBalanceFactor(node.leftSon) - self.calculateBalanceFactor(node.rightSon)
-			return node.height
-
-	def calculateBalanceFactorAscendent(self, node):
-		while node is not None:
-			node.balanceFactor =  node.leftSon.height - node.rightSon.height
-			node = node.father
-
-		if node is None:
-			return -1
-		else:
-
-			return node.height
 
 	def isEmpty(self):
 		if self.root is None:
@@ -155,7 +105,6 @@ class AVLTree:
 		return self.root.isLeaf()
 
 	root = property(__getRoot, __setRoot)
-	height = property(__getHeight, __setHeight)
 
 
 	def insertNode(self, value):
@@ -179,11 +128,7 @@ class AVLTree:
 			else:
 				father.rightSon = newNode
 
-		if value > self.root.data:
-			self.calculateHeight(self.root.rightSon)
-		else:
-			self.calculateHeight(self.root.leftSon)
-		return
+		return self.balance(newNode)
 
 
 			# node = self.root
@@ -222,11 +167,7 @@ class AVLTree:
 			else:
 				self.root = newNode
 
-			if value > self.root.data:
-				self.calculateHeight(self.root.rightSon)
-			else:
-				self.calculateHeight(self.root.leftSon)
-			return
+			return self.balance(newNode)
 
 
 		# if self.isEmpty():
@@ -266,16 +207,16 @@ class AVLTree:
 			raise ValueError("Value not found!")
 
 
-	def order(self, node=None, method="io", printHeight=False, printBalanceFactor=False):
+	def order(self, node=None, method="io"):
 		if node is None:
 			node = self.root
 
 		if method.lower() == "io":
-			self.inOrderRecEngine(node, printHeight, printBalanceFactor)
+			self.inOrderRecEngine(node)
 		elif method.lower() == "pre":
-			self.preOrderRecEngine(node, printHeight, printBalanceFactor)
+			self.preOrderRecEngine(node)
 		else:
-			self.posOrderRecEngine(node, printHeight, printBalanceFactor)
+			self.posOrderRecEngine(node)
 
 
 	def inOrderIterEngine(self, node):
@@ -293,35 +234,24 @@ class AVLTree:
 		pass
 
 
-	def inOrderRecEngine(self, node, printHeight, printBalanceFactor):
+	def inOrderRecEngine(self, node):
 		if node is not None:
-			self.inOrderRecEngine(node.leftSon, printHeight, printBalanceFactor)
+			self.inOrderRecEngine(node.leftSon)
 			print(node.data,end=" ")
-			if printHeight:
-				print(node.height, end= " ")
-			if printBalanceFactor:
-				print(node.balanceFactor, end=" ")
-			self.inOrderRecEngine(node.rightSon, printHeight, printBalanceFactor)
+			self.inOrderRecEngine(node.rightSon)
 
-	def preOrderRecEngine(self, node, printHeight, printBalanceFactor):
+	def preOrderRecEngine(self, node):
 		if node is not None:
 			print(node.data,end=" ")
-			if printHeight:
-				print(node.height, end= " ")
-			if printBalanceFactor:
-				print(node.balanceFactor, end=" ")
-			self.inOrderRecEngine(node.leftSon, printHeight, printBalanceFactor)
-			self.inOrderRecEngine(node.rightSon, printHeight, printBalanceFactor)
+			self.inOrderRecEngine(node.leftSon)
+			self.inOrderRecEngine(node.rightSon)
 
-	def posOrderRecEngine(self, node, printHeight, printBalanceFactor):
+	def posOrderRecEngine(self, node):
 		if node is not None:
-			self.inOrderRecEngine(node.leftSon, printHeight, printBalanceFactor)
-			self.inOrderRecEngine(node.rightSon, printHeight, printBalanceFactor)
+			self.inOrderRecEngine(node.leftSon)
+			self.inOrderRecEngine(node.rightSon)
 			print(node.data,end=" ")
-			if printHeight:
-				print(node.height, end= " ")
-			if printBalanceFactor:
-				print(node.balanceFactor, end=" ")
+
 
 	def maximum(self, node=None):
 		if node is None:
@@ -450,59 +380,126 @@ class AVLTree:
 		return
 
 
-	def rotate(self, node):
-		if node.hasRightSon() and node.rightSon.hasRightSon():
-			self.rotateLeft(node)
-		elif node.hasLeftSon() and node.leftSon.hasLeftSon():
-			self.rotateRight(node)
-		elif node.hasLeftSon() and node.leftSon.hasRightSon():
-			self.doubleRotateRight(node)
+	def calculateHeightAndBalanceFactor(self, node):
+		if node is None:
+			return -1
 		else:
-			self.doubleRotateLeft(node)
+			leftHeight = self.calculateHeightAndBalanceFactor(node.leftSon)
+			rightHeight = self.calculateHeightAndBalanceFactor(node.rightSon)
+			node.balanceFactor = leftHeight - rightHeight
+			if leftHeight >= rightHeight:
+				node.height = leftHeight + 1
+				return node.height
+			else:
+				node.height = rightHeight + 1
+				return node.height
+
+	def calculateHeightAndBalanceFactorAscendent(self, node):
+		self.calculateHeightAndBalanceFactor(node)
+
+		while node is not None:
+			try:
+				leftHeight = node.leftSon.height
+			except:
+				leftHeight = -1
+
+			try:
+				rightHeight = node.rightSon.height
+			except:
+				rightHeight = -1
+
+			node.balanceFactor = leftHeight - rightHeight
+
+			if leftHeight > rightHeight:
+				node.height = leftHeight + 1
+			else:
+				node.height = rightHeight + 1
+
+			node = node.father
+
+
+	# def calculateBalanceFactor(self, node):
+	# 	if node is None:
+	# 		return -1
+	# 	else:
+	# 		node.balanceFactor = self.calculateBalanceFactor(node.leftSon) - self.calculateBalanceFactor(node.rightSon)
+	# 		if node.balanceFactor > 1 or node.balanceFactor < -1:
+	# 			self.balance(node)
+	# 		return node.height
+
+	# def calculateBalanceFactorAscendent(self, node):
+	# 	while node is not None:
+	# 		try:
+	# 			leftHeight = node.leftSon.height
+	# 		except:
+	# 			leftHeight = -1
+	# 		try:
+	# 			rightHeight = node.rightSon.height
+	# 		except:
+	# 			rightHeight = -1
+
+	# 		node.balanceFactor =  leftHeight - rightHeight
+	# 		node = node.father
+	# 	return
+
+	def balance(self, node):
+		while node is not None:
+			self.calculateHeightAndBalanceFactor(node)
+
+			if node.balanceFactor < -1 or node.balanceFactor > 1:
+				if node.hasRightSon() and node.rightSon.hasRightSon():
+					self.rotateLeft(node)
+				elif node.hasLeftSon() and node.leftSon.hasLeftSon():
+					self.rotateRight(node)
+				elif node.hasLeftSon() and node.leftSon.hasRightSon():
+					self.doubleRotateRight(node)
+				else:
+					self.doubleRotateLeft(node)
+			else:
+				node = node.father
 		return
 
 
 	def rotateLeft(self, node):
 		swap = node.rightSon
+		node.rightSon = swap.leftSon
 
-		## Troca do filho direito de "node" ##
-		# swap.leftSon.father = node
-		# node.rightSon = swap.rightSon
+		if node.rightSon is not None:
+			node.rightSon.father = node
 
-		## Troca do pai de "node" ##
-		swap.leftSon = node
 		swap.father = node.father
-		node.father = swap
 
-		## Ajuste do ponteiro do pai de "node" ##
-		if node is self.root:
+		if node.father is None:
 			self.root = swap
 		elif node is node.father.leftSon:
 			node.father.leftSon = swap
 		else:
 			node.father.rightSon = swap
-		return
+
+		swap.leftSon = node
+		node.father = swap
+		return swap
 
 	def rotateRight(self, node):
 		swap = node.leftSon
+		node.leftSon = swap.rightSon
 
-		## Troca do filho esquerdo de "node" ##
-		# swap.rightSon.father = node
-		# node.leftSon = swap.rightSon
+		if node.leftSon is not None:
+			node.leftSon.father = node
 
-		## Troca do pai de "node" ##
-		swap.rightSon = node
 		swap.father = node.father
-		node.father = swap
 
-		## Ajuste do ponteiro do pai de "node" ##
-		if node is self.root:
+		if node.father is None:
 			self.root = swap
 		elif node is node.father.leftSon:
 			node.father.leftSon = swap
 		else:
 			node.father.rightSon = swap
-		return
+
+		swap.rightSon = node
+		node.father = swap
+		return swap
+
 
 	def doubleRotateLeft(self, node):
 		swap = node.rightSon
@@ -519,8 +516,7 @@ class AVLTree:
 		# Ligacao do pai do ultimo node
 		node.rightSon.rightSon = swap
 
-		self.rotateLeft(node) #Rotacao convencional a esquerda
-		return
+		return self.rotateLeft(node) #Rotacao convencional a esquerda
 
 	def doubleRotateRight(self, node):
 		swap = node.leftSon
@@ -537,8 +533,7 @@ class AVLTree:
 		# Ligacao do pai do ultimo node
 		node.leftSon.leftSon = swap
 
-		self.rotateRight(node)
-		return
+		return self.rotateRight(node)
 
 
 ############### MAIN ###############
@@ -559,7 +554,7 @@ from random import sample
 for _ in range(1):
 	a = pc()
 	# amostra = amostras(100000)
-	amostra = [405, 46, 692, 344, 530, 131, 727, 908, 701, 923]
+	amostra = [405, 46, 692, 344, 530, 131, 727, 908, 701, 923, 950]
 	b = pc()
 	createSampleT = b - a
 
@@ -578,14 +573,14 @@ for _ in range(1):
 
 	e = pc()
 	# valor, *_ = sample(amostra, 1)
-	arvoreAVL.calculateHeight(arvoreAVL.root)
+	# arvoreAVL.calculateHeight(arvoreAVL.root)
 	e1 = pc()
 	assignT = e1 - e
 
 	# no = arvore.searchValue(valor)
 	f = pc()
 	# print(no.data)
-	arvoreAVL.calculateBalanceFactor(arvoreAVL.root)
+	# arvoreAVL.calculateBalanceFactor(arvoreAVL.root)
 	g = pc()
 	searchT = g - f
 
@@ -595,7 +590,8 @@ for _ in range(1):
 	# orderT = h - g
 	# i = pc()
 	# max = arvore.maximum().data
-	# arvoreAVL.order(method="pre",printBalanceFactor=False, printHeight=False)
+	arvoreAVL.order()
+	# arvoreAVL.order(method="pre")
 	# j = pc()
 	# maximoT = j - i
 
