@@ -121,7 +121,6 @@ class AVLTree:
 				father.rightSon = newNode
 
 		print("inserted")
-		self.calculateHeightAscendent(newNode)
 		self.balance(newNode)
 		return
 
@@ -369,7 +368,7 @@ class AVLTree:
 	def balance(self, node):
 		print("Balancing... ... ...")
 		while node is not None:
-			self.calculateHeightAscendent(node)
+			self.calculateTreeHeight(node)
 			balanceFactor = self.nodeHeight(node.leftSon) - self.nodeHeight(node.rightSon)
 
 			if balanceFactor < -1 or balanceFactor > 1:
@@ -390,8 +389,8 @@ class AVLTree:
 		swap = node.rightSon
 		node.rightSon = swap.leftSon
 
-		if node.rightSon is not None:
-			node.rightSon.father = node
+		if swap.leftSon is not None: # ATRIBUIÇÃO TROCADA PELA DA LINHA ANTERIOR -- node.rightSon == swap.leftSon, logo, havia usado node.rightSon
+			swap.leftSon.father = node
 
 		swap.father = node.father
 
@@ -406,15 +405,14 @@ class AVLTree:
 		node.father = swap
 		print("Rotated LEFT...")
 		self.calculateTreeHeight(swap)
-
-		return swap
+		return
 
 	def rotateRight(self, node):
 		swap = node.leftSon
 		node.leftSon = swap.rightSon
 
-		if node.leftSon is not None:
-			node.leftSon.father = node
+		if swap.rightSon is not None:
+			swap.rightSon.father = node
 
 		swap.father = node.father
 
@@ -430,8 +428,7 @@ class AVLTree:
 
 		print("Rotated RIGHT...")
 		self.calculateTreeHeight(swap)
-
-		return swap
+		return
 
 
 	def doubleRotateLeft(self, node):
@@ -464,11 +461,11 @@ from random import sample
 
 for _ in range(1):
 	a = pc()
-	amostra = amostras(6)
+	# amostra = amostras(6)
 	# amostra = [405, 46, 692, 344, 530, 131, 727, 908, 701, 923, 950, 15, 29, 200]
-	# amostra_loop = [86, 92, 62, 13, 40, 73, 27, 76, 99, 87]
-	# amostra_loop = [75, 28, 71, 54, 22, 35, 7, 53]
-	# amostra_loop = [8, 33, 3, 32, 55, 31]
+	amostra = [86, 92, 62, 13, 40, 73, 27, 76, 99, 87] # Amostra com loop infinito
+	# amostra = [75, 28, 71, 54, 22, 35, 7, 53] # Amostra com loop infinito
+	# amostra = [8, 33, 3, 32, 55, 31] # Amostra com loop infinito
 	b = pc()
 	createSampleT = b - a
 
