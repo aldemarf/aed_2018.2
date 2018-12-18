@@ -121,6 +121,7 @@ class AVLTree:
 				father.rightSon = newNode
 
 		print("inserted")
+		self.calculateHeightAscendent(newNode)
 		self.balance(newNode)
 		return
 
@@ -353,7 +354,6 @@ class AVLTree:
 
 
 	def calculateHeightAscendent(self, node):
-		node = node.father
 		while node is not None:
 			leftHeight = self.nodeHeight(node.leftSon)
 			rightHeight = self.nodeHeight(node.rightSon)
@@ -369,7 +369,7 @@ class AVLTree:
 	def balance(self, node):
 		print("Balancing... ... ...")
 		while node is not None:
-			self.calculateNodeHeight(node)
+			self.calculateHeightAscendent(node)
 			balanceFactor = self.nodeHeight(node.leftSon) - self.nodeHeight(node.rightSon)
 
 			if balanceFactor < -1 or balanceFactor > 1:
@@ -404,9 +404,8 @@ class AVLTree:
 
 		swap.leftSon = node
 		node.father = swap
-		print("Rotated LEFT...Rotated LEFT...")
-		self.calculateNodeHeight(swap)
-		self.calculateNodeHeight(node)
+		print("Rotated LEFT...")
+		self.calculateTreeHeight(swap)
 
 		return swap
 
@@ -429,46 +428,20 @@ class AVLTree:
 		swap.rightSon = node
 		node.father = swap
 
-		print("Rotated RIGHT...Rotated RIGHT...")
-		self.calculateNodeHeight(swap)
-		self.calculateNodeHeight(node)
+		print("Rotated RIGHT...")
+		self.calculateTreeHeight(swap)
 
 		return swap
 
 
 	def doubleRotateLeft(self, node):
-		# swap = node.rightSon
-
-		# # Troca do novo filho direito de "node"
-		# node.rightSon = swap.leftSon
-		# node.rightSon.father = node
-
-		# # Ajuste do ultimo node do subarvore
-		# swap.father = node.rightSon
-		# swap.leftSon = None
-		# swap.rightSon = None
-
-		# # Ligacao do pai do ultimo node
-		# node.rightSon.rightSon = swap
+		print("Rotated DOUBLE LEFT...")
 		self.rotateRight(node.rightSon) # Rotacao convencional a direita do filho direito
 		self.rotateLeft(node) # Rotacao convencional a esquerda
 		return
 
 	def doubleRotateRight(self, node):
-		# swap = node.leftSon
-
-		# # Troca do novo filho direito de "node"
-		# node.leftSon = swap.rightSon
-		# node.leftSon.father = node
-
-		# # Ajuste do ultimo node do subarvore
-		# swap.father = node.leftSon
-		# swap.leftSon = None
-		# swap.rightSon = None
-
-		# # Ligacao do pai do ultimo node
-		# node.leftSon.leftSon = swap
-
+		print("Rotated DOUBLE RIGHT...")
 		self.rotateLeft(node.leftSon) # Rotacao convencional a esquerda do filho esquerdo
 		self.rotateRight(node) # Rotacao convencional a direita
 		return
@@ -483,7 +456,7 @@ def amostras (tamanho):
 	from random import sample
 	population = list(range(tamanho * 10))
 	amostra = sample(population, tamanho)
-	# print(amostra)
+	print(amostra)
 	return amostra
 
 from time import perf_counter as pc
@@ -491,8 +464,11 @@ from random import sample
 
 for _ in range(1):
 	a = pc()
-	amostra = amostras(100)
+	amostra = amostras(6)
 	# amostra = [405, 46, 692, 344, 530, 131, 727, 908, 701, 923, 950, 15, 29, 200]
+	# amostra_loop = [86, 92, 62, 13, 40, 73, 27, 76, 99, 87]
+	# amostra_loop = [75, 28, 71, 54, 22, 35, 7, 53]
+	# amostra_loop = [8, 33, 3, 32, 55, 31]
 	b = pc()
 	createSampleT = b - a
 
