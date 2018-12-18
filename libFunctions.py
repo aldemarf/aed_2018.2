@@ -8,10 +8,17 @@
 
 
 ### BIBLIOTECA DE FUNCOES ###
+from libClasses import Book, User, RedWhiteTree
+import os, time
 
-from libClasses import *
+usersBase = RedWhiteTree()
+booksBase = RedWhiteTree()
 
-def valida_faixa_inteiro(pergunta, inicio, fim):
+def limpaTela():
+    # LIMPA A TELA
+    return os.system('cls' if os.name == 'nt' else 'clear')
+
+def validaFaixaInteiro(pergunta, inicio, fim):
     # VALIDA A ENTRADA DE ACORDO COM UMA FAIXA DE INTEIROS RECEBIDA
     while True:
         try:
@@ -19,13 +26,13 @@ def valida_faixa_inteiro(pergunta, inicio, fim):
             if inicio <= valor <= fim:
                 return(valor)
             else:
-                pausa_para_leitura('\033[91mValor inválido, favor digitar entre {} e {}\033[0m'.format(inicio, fim), 2)
+                pausaParaLeitura('\033[91mValor inválido, favor digitar entre {} e {}\033[0m'.format(inicio, fim), 2)
         except ValueError:
             print()
-            pausa_para_leitura('\033[91mValor inválido, favor digitar entre {} e {}\033[0m'.format(inicio, fim), 2)
+            pausaParaLeitura('\033[91mValor inválido, favor digitar entre {} e {}\033[0m'.format(inicio, fim), 2)
     return
 
-def pausa_para_leitura(texto, tempo=5):
+def pausaParaLeitura(texto, tempo=5):
     # PAUSA PROGRAMA PARA LEITURA DE MENSAGENS
     print ('{}'.format(texto))
     time.sleep(tempo)
@@ -40,55 +47,69 @@ def loadBooksDatabase():
 		books.insertNode(book)
 
 
+def addUser(usersBase):
+	userName = input("Nome: ")
+	userPassword = input("Senha: ")
+	user = User(userName, userPassword)
+	userID = user.key
+	print("\n USER \"{}\" REGISTRED AT THE ID \033[91m\"{}\"\033[0m".format(userName, userID))
+	usersBase.Insert(user)
+
+
+def addBook(booksBase):
+	bookTitle = input("Titulo do livro: ")
+	book = Book(bookTitle)
+	bookID = book.key
+	try:
+		if booksBase.searchValue(book) is not booksBase.NoneNode:
+			return("\nBOOK ALREADY REGISTERED.")
+	except ValueError:
+		pass
+	booksBase.Insert(book)
+	print("\nBOOK REGISTRED AT THE ID \"{}\".".format(bookID))
+
+
+def withdrawBook(usersBase,booksBase,userKey):
+	user = usersBase.SearchKey(userKey)
+
+	if user is usersBase.NoneNode:
+		return print("Invalid user ID.")
+
+	bookID = -1
+
+	while bookID != 0:
+		limpaTela()
+		bookID = int(input("ID do livro: (0 - exit)"))
+		book = booksBase.SearchKey(bookID)
+		if book is booksBase.NoneNode:
+			print("Invalid book ID. Try again.")
+		else:
+			break
+
+	if book.isAvailable:
+		if user.loans >= 5:
+			print("\nYou have passed loans' limit.")
+
+			user.set_empSoma()
+			book.set_status(False)
+			user.set_livros(book.get_name())
+			user.set_livrosId(book.get_id())
+			print("\nBook withdrawn.")
+		else:
+			user.withdrawBook(book.key, book.title)
+			book.copies -= 1
+	else:
+		print("\nUnavailable book.")
+
+
+
+
 #   #####################################################################
 #  # REDACT	  REDACT		REDACT		REDACT		REDACT		REDACT #
 # #####################################################################
 
 
-def cadastrar_usuario(Tree):
-	entr = input("Digite seu nome: ")
-	senha = input("Digite sua senha: ")
-	usuario = User(entr,senha)
-	ID = usuario.get_id()
-	print("\n{}, seu id é |{}| e sua senha é |{}|".format(entr, ID, senha))
-	Tree.Insert(usuario)
 
-def cadastrar_livro(Tree):
-	print("\nEsses são os livros já cadastrados: ")
-	Tree.Inorder_books(Tree.get_root())
-	entr = input("Digite o nome do livro: ")
-	livro = Book(entr)
-	Tree.Insert(livro)
-	print("\nLivro cadastrado com sucesso")
-
-def emprestar_livro(TreeU,TreeL,l):
-	print("")
-	TreeL.Inorder_disp(TreeL.get_root())
-	while True:
-		IdUser=l
-		IdLivro=int(input("Digite o Id do livro: "))
-		user = TreeU.SearchId(TreeU.get_root(),IdUser).get_key()
-		book = TreeL.SearchId(TreeL.get_root(),IdLivro).get_key()
-		if user != None and book != None:
-			break
-		else:
-			print("")
-			print("Id do Usuário ou do livro inválido")
-			return
-	if book.get_status() == False:
-		print("")
-		print("Livro indisponível")
-	else:
-		if user.get_emp() < 5:
-			user.set_empSoma()
-			book.set_status(False)
-			user.set_livros(book.get_name())
-			user.set_livrosId(book.get_id())
-			print("")
-			print('O "{}" foi entregue para {}, cujo ID é {}'.format(book.get_name(),user.get_name(),user.get_id()))
-		else:
-			print("")
-			print("Usuário ultrapassou o limite de empréstimos")
 
 def devolver_livro(TreeU,TreeL,l):
 	while True:

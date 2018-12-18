@@ -35,7 +35,7 @@ def menuPrincipal():
 
     opcao = -1
     while True:
-        limpa_tela()
+        limpaTela()
         print('''
 ---------------------------
 -     \033[1m     MENU      \033[0m     -
@@ -54,7 +54,7 @@ def menuPrincipal():
  0 - SAIR
 ---------------------------
 ''')
-        opcao = valida_faixa_inteiro('Escolha uma opção: ',0,10)
+        opcao = validaFaixaInteiro('Escolha uma opção: ',0,10)
         if opcao == 0:
             break
         menu_principal[opcao]()

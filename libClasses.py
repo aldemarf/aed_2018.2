@@ -340,8 +340,6 @@ class RedWhiteTree():
 		return
 
 
-
-
 	def searchValue(self, value):
 		if self.isEmpty():
 			raise RuntimeError("The tree is empty!")
@@ -354,7 +352,21 @@ class RedWhiteTree():
 					node = node.rightSon
 				else:
 					return node
-			raise ValueError("Value not found!")
+			raise ValueError("Element not found!")
+
+	def searchKey(self, key):
+		if self.isEmpty():
+			raise RuntimeError("The tree is empty!")
+		else:
+			node = self.root
+			while node is not self.NoneNode:
+				if key < node.data.key:
+					node = node.leftSon
+				elif key > node.data.key:
+					node = node.rightSon
+				else:
+					return node
+			raise ValueError("Key not found!")
 
 
 	def order(self, node=None, method="ino"):
