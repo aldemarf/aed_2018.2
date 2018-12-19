@@ -248,6 +248,10 @@ class RedWhiteTree():
 	def __init__(self):
 		self.__root = self.NoneNode
 
+	def __str__(self):
+		self.inOrderRecEngine(self.root)
+		return "\n"
+
 	@property
 	def root(self):
 		return self.__root
@@ -255,14 +259,6 @@ class RedWhiteTree():
 	@root.setter
 	def root(self, value):
 		self.__root = value
-
-#   #####################################################################
-#  # TEST	  TEST		TEST	  TEST	    TEST    	TEST	  TEST #
-# #####################################################################
-
-	def __str__(self):
-		self.inOrderRecEngine(self.root)
-		return "\n"
 
 	def isEmpty(self):
 		if self.root is self.NoneNode:
@@ -280,7 +276,7 @@ class RedWhiteTree():
 
 		while node is not self.NoneNode:
 			father = node
-			if value.data.key <= node.data.key:
+			if value.key <= node.data.key:
 				node = node.leftSon
 			else:
 				node = node.rightSon
@@ -293,88 +289,154 @@ class RedWhiteTree():
 				father.leftSon = newNode
 			else:
 				father.rightSon = newNode
-
-		pass # self.insertFix(newNode)
+		
+		newNode.color = "red"		
+		self.insertFix(newNode)
 		return
 
+	
+	def insertFix(self, node):
+		while node.father.color == "red":
+			if node.father == node.father.father.leftSon:
 
-	def insertNodeRec(self, value, node, father=None):
-		if node is not self.NoneNode:
-			if value.key <= node.data.key:
-				self.insertNodeRec(value, node.leftSon, node)
-			else:
-				self.insertNodeRec(value, node.rightSon, node)
-		else:
-			newNode = RWTNode(value, "red", self.NoneNode)
-			newNode.father = father
+				y = node.father.father.rightSon
+				if y.color == "red":
+					node.father.color = "white"
+					y.color = "white"
+					node.father.father.color = "red"
+					node = node.father.father
 
-			if father is None:
-				father = self.NoneNode
-
-			if father is not self.NoneNode:
-				if value.key <= father.data.key:
-					father.leftSon = newNode
 				else:
-					father.rightSon = newNode
+					if node == node.father.rightSon:
+						node = node.father
+						self.rotateLeft(node)
+					node.father.color = "white"
+					node.father.father.color = "red"
+					self.rotateRight(node.father.father)
+
 			else:
-				self.root = newNode
+				y = node.father.father.leftSon
+				if y.color == "red":
+					node.father.color = "white"
+					y.color = "white"
+					node.father.father.color = "red"
+					node = node.father.father
 
-			pass # self.insertFix(newNode)
-			return
-
-
-	def remove(self, value):
-		node = self.searchValue(value)
-
-		if node.isLeaf():
-			self.removeNS(node)
-		elif node.sons() == 1:
-			self.removeOS(node)
-		else:
-			self.removeTS(node)
-
-
-	def removeNS(self, node):
-		if node is self.root:
-			self.root = None
-		elif node.data <= node.father.data:
-			node.father.leftSon = None
-		else:
-			node.father.rightSon = None
-		return
-
-	def removeOS(self, node):
-		if node is self.root:
-			if node.hasLeftSon():
-				node.leftSon.father = None
-				self.root = node
-			else:
-				node.rightSon.father = None
-				self.root = node
-		else:
-			if node.hasLeftSon():
-				node.leftSon.father = node.father
-				if node.data <= node.father.data:
-					node.father.leftSon = node.leftSon
 				else:
-					node.father.rightSon = node.leftSon
-			else:
-				node.rightSon.father = node.father
-				if node.data <= node.father.data:
-					node.father.leftSon = node.rightSon
-				else:
-					node.father.rightSon = node.rightSon
-		return
+					if node == node.father.leftSon:
+						node = node.father
+						self.rotateRight(node)
 
-	def removeTS(self, node):
-		predecessor = self.predecessor(node=node)
-		node.data = predecessor.data
+					node.father.color = "white"
+					node.father.father.color = "red"
+					self.rotateLeft(node.father.father)
 
-		if predecessor.isLeaf():
-			self.removeNS(predecessor)
+		self.root.color = "white"
+
+	def transplantNode(self, node, node2):
+		if node is self.NoneNode:
+			self.root = node2
+		elif node is node.father.leftSon:
+			node.father.leftSon = node2
 		else:
-			self.removeOS(predecessor)
-		return
+			node.father.rightSon = node2
+		
+		node2.father = node.father
+
+	
+	def remove(self, key):
+		node = self.searchKey(key)
+
+		swap = node
+		swapOriginColor = swap.color
+
+		if node.leftSon is self.NoneNode:
+			swap2 = node.rightSon
+			self.transplantNode(node, node.rightSon)
+		elif node.rightSon is self.NoneNode:
+			swap2 = node.leftSon
+			self.transplantNode(node, node.leftSon)
+		else:
+			swap = self.minimum(node.rightSon)
+			swapOriginColor = swap.color
+			swap2 = swap.rightSon
+
+			if swap.father is node:
+				swap2.father = swap
+			else:
+				self.transplantNode(node, swap)
+				swap.rightSon = node.rightSon
+				swap.rightSon.father = swap
+		
+			self.transplantNode(node, swap)
+			swap.leftSon = node.leftSon
+			swap.leftSon.father = swap
+			swap.color = node.color
+		
+		if swapOriginColor == "white":
+			self.removesFix(node)
+
+	def removesFix(self, node):
+		while node is not self.root and node.color == "white":
+			if node is node.father.leftSon:
+				swap = node.father.rightSon
+
+				if swap.color == "red": # Caso 1
+					swap.color = "white"
+					node.father.color = "red"
+
+					self.rotateLeft(node.father)
+
+					swap = node.father.rightSon
+
+				if swap.leftSon.color == "white" and swap.rightSon.color == "white": # Caso 2
+					swap.color = "red"
+					node = node.father
+				else: # Caso 3
+					if swap.rightSon.color == "white":
+						swap.leftSon.color = "white"
+						swap.color = "red"
+
+						self.rotateRight(swap)
+
+						swap = node.father.rightSon
+						swap.color = node.father.color
+						node.father.color = "white"
+						swap.rightSon.color = "white"
+						
+						self.rotateLeft(node.father)
+						
+						node = self.root
+			else:
+				swap = node.father.leftSon
+
+				if swap.color == "red": # Caso 1
+					swap.color = "white"
+					node.father.color = "red"
+
+					self.rotateRight(node.father)
+
+					swap = node.father.leftSon
+
+				if swap.rightSon.color == "white" and swap.leftSon.color == "white": # Caso 2
+					swap.color = "red"
+					node = node.father
+
+				else: # Caso 3
+					if swap.leftSon.color == "white":
+						swap.rightSon.color = "white"
+						swap.color = "red"
+
+						self.rotateLeft(swap)
+
+						swap = node.father.leftSon
+						swap.color = node.father.color
+						node.father.color = "white"
+						swap.leftSon.color = "white"
+						
+						self.rotateRight(node.father)
+
+		node.color = "white"
 
 
 	def searchValue(self, value):
@@ -513,47 +575,6 @@ class RedWhiteTree():
 				return node
 
 
-	def calculateTreeHeight(self, node):
-		# print("Tree height...")
-		if node is self.NoneNode:
-			return -1
-		else:
-			leftHeight = self.calculateTreeHeight(node.leftSon)
-			rightHeight = self.calculateTreeHeight(node.rightSon)
-
-			if leftHeight >= rightHeight:
-				node.height = leftHeight + 1
-			else:
-				node.height = rightHeight + 1
-
-			return node.height
-
-
-
-#   #####################################################################
-#  # ERROR	  ERROR		ERROR	  ERROR	    ERROR      ERROR	 ERROR #
-# #####################################################################
-
-	def balance(self, node):
-		# print("Balancing... ... ...")
-		while node is not None:
-			self.calculateHeightAscendent(node)
-			balanceFactor = self.nodeHeight(node.leftSon) - self.nodeHeight(node.rightSon)
-
-			if balanceFactor < -1 or balanceFactor > 1:
-				if node.hasRightSon() and node.rightSon.hasRightSon():
-					self.rotateLeft(node)
-				elif node.hasLeftSon() and node.leftSon.hasLeftSon():
-					self.rotateRight(node)
-				elif node.hasLeftSon() and node.leftSon.hasRightSon():
-					self.doubleRotateRight(node)
-				else:
-					self.doubleRotateLeft(node)
-			else:
-				node = node.father
-		return
-
-
 	def rotateLeft(self, node):
 		swap = node.rightSon
 		node.rightSon = swap.leftSon
@@ -572,9 +593,6 @@ class RedWhiteTree():
 
 		swap.leftSon = node
 		node.father = swap
-		# print("Rotated LEFT...")
-		self.calculateTreeHeight(swap)
-
 		return swap
 
 	def rotateRight(self, node):
@@ -595,171 +613,4 @@ class RedWhiteTree():
 
 		swap.rightSon = node
 		node.father = swap
-
-		# print("Rotated RIGHT...")
-		self.calculateTreeHeight(swap)
-
 		return swap
-
-
-	def doubleRotateLeft(self, node):
-		# print("Rotated DOUBLE LEFT...")
-		self.rotateRight(node.rightSon) # Rotacao convencional a direita do filho direito
-		self.rotateLeft(node) # Rotacao convencional a esquerda
-		return
-
-	def doubleRotateRight(self, node):
-		# print("Rotated DOUBLE RIGHT...")
-		self.rotateLeft(node.leftSon) # Rotacao convencional a esquerda do filho esquerdo
-		self.rotateRight(node) # Rotacao convencional a direita
-		return
-
-
-
-
-
-#   #####################################################################
-#  # REDACT	  REDACT		REDACT		REDACT		REDACT		REDACT #
-# #####################################################################
-
-
-
-	def Insert_Fixup(self, z):
-		while z.get_p().get_cor() == "RED":
-			if z.get_p() == z.get_p().get_p().get_left():
-				y = z.get_p().get_p().get_right()
-				if y.get_cor() == "RED":
-					z.get_p().set_cor("BLACK")
-					y.set_cor("BLACK")
-					z.get_p().get_p().set_cor("RED")
-					z = z.get_p().get_p()
-				else:
-					if z == z.get_p().get_right():
-						z = z.get_p()
-						self.Left_Rotate(z)
-					z.get_p().set_cor("BLACK")
-					z.get_p().get_p().set_cor("RED")
-					self.Right_Rotate(z.get_p().get_p())
-			else:
-				y = z.get_p().get_p().get_left()
-				if y.get_cor() == "RED":
-					z.get_p().set_cor("BLACK")
-					y.set_cor("BLACK")
-					z.get_p().get_p().set_cor("RED")
-					z = z.get_p().get_p()
-				else:
-					if z == z.get_p().get_left():
-						z = z.get_p()
-						self.Right_Rotate(z)
-					z.get_p().set_cor("BLACK")
-					z.get_p().get_p().set_cor("RED")
-					self.Left_Rotate(z.get_p().get_p())
-		self.root().set_cor("BLACK")
-
-
-	def removeFix(self, x):
-		while x != self.root() and x.get_cor() == "BLACK":
-			if x == x.get_p().get_left():
-				w = x.get_p().get_right()
-				if w.get_cor() == "RED":
-					w.set_cor("BLACK")
-					x.get_p().set_cor("RED")
-					self.Left_Rotate(x.get_p())
-					w = x.get_p().get_right()
-				if w.get_left().get_cor() == "BLACK" and w.get_right().get_cor() == "BLACK":
-					w.set_cor("RED")
-					x = x.get_p()
-				else:
-					if w.get_right() == "BLACK":
-						w.get_left().set_cor("BLACK")
-						w.set_cor("RED")
-						self.Right_Rotate(w)
-						w = x.get_p().get_right()
-						w.set_cor(x.get_p().get_cor())
-						x.get_p.set_cor("BLACK")
-						w.get_right().set_cor("BLACK")
-						self.Left_Rotate(x.get_p())
-						x = self.root()
-			else:
-				w = x.get_p().get_left()
-				if w.get_cor() == "RED":
-					w.set_cor("BLACK")
-					x.get_p().set_cor("RED")
-					self.Right_Rotate(x.get_p())
-					w = x.get_p().get_left()
-				if w.get_right().get_cor() == "BLACK" and w.get_left().get_cor() == "BLACK":
-					w.set_cor("RED")
-					x = x.get_p()
-				else:
-					if w.get_left() == "BLACK":
-						w.get_right().set_cor("BLACK")
-						w.set_cor("RED")
-						self.Left_Rotate(w)
-						w = x.get_p().get_left()
-						w.set_cor(x.get_p().get_cor())
-						x.get_p.set_cor("BLACK")
-						w.get_left().set_cor("BLACK")
-						self.Right_Rotate(x.get_p())
-						x = self.root()
-		x.set_cor("BLACK")
-
-	def remove(self,key):
-		z = self.SearchId(self.root(), key)
-		if z == self.NoneNode:
-			return 0
-		if z.get_left() == self.NoneNode or z.get_right() == self.NoneNode:
-			y = z
-		else:
-			y = self.Sucessor(z)
-		if y.get_left() != self.NoneNode:
-			x = y.get_left()
-		else:
-			x = y.get_right()
-		if x != self.NoneNode:
-			x.set_p(y.get_p())
-		if y.get_p() == self.NoneNode:
-			self.root(x)
-		elif y == y.get_p().get_left():
-			y.get_p().set_left(x)
-		else:
-			y.get_p().set_right(x)
-		if y != z:
-			z.set_key(y.get_key())
-		if y.get_cor() == "BLACK":
-			self.removeFix(x)
-		return y
-
-	def Left_Rotate(self, x):
-		y = x.get_right()
-		x.set_right(y.get_left())
-		y.get_left().set_p(x)
-		y.set_p(x.get_p())
-
-		if x.get_p() == self.NoneNode:
-			y.get_left().set_p(x)
-		y.set_p(x.get_p())
-		if x.get_p() == self.NoneNode:
-			self.root(y)
-		elif x == x.get_p().get_left():
-			x.get_p().set_left(y)
-		else:
-			x.get_p().set_right(y)
-		y.set_left(x)
-		x.set_p(y)
-
-	def Right_Rotate(self, x):
-		y = x.get_left()
-		x.set_left(y.get_right())
-		y.get_right().set_p(x)
-		y.set_p(x.get_p())
-		if x.get_p() == self.NoneNode:
-			y.get_right().set_p(x)
-		y.set_p(x.get_p())
-		if x.get_p() == self.NoneNode:
-			self.root(y)
-		elif x == x.get_p().get_right():
-			x.get_p().set_right(y)
-		else:
-			x.get_p().set_left(y)
-		y.set_right(x)
-		x.set_p(y)
