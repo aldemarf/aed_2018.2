@@ -64,7 +64,11 @@ class User:
 
 	@property
 	def books(self):
-		return self.__books.items()
+		return self.__books
+	
+	@property
+	def booksList(self):
+		return self.books
 
 	@books.setter
 	def books(self, bookID, title):
@@ -105,7 +109,7 @@ class Book:
 		self.__available = True
 
 	def __str__(self):
-		return print("{} : {} -- Copies:{} -- Borrowed Copies: {}".format(self.key, self.title, self.copies, self.borrowedCopies))
+		return "{} : {} -- Copies:{} -- Borrowed Copies: {}".format(self.key, self.title, self.copies, self.borrowedCopies)
 	
 	@property
 	def key(self):
@@ -163,6 +167,9 @@ class RWTNoneNode:
 		self.__leftSon = self
 		self.__rightSon = self
 
+	def __str__(self):
+		return ""
+
 	@property
 	def color(self):
 		return self.__color
@@ -188,7 +195,6 @@ class RWTNoneNode:
 		return self.__rightSon
 
 class RWTNode:
-	
 	def __init__(self, data, color):
 		self.__color = color
 		self.__data = data
@@ -237,17 +243,14 @@ class RWTNode:
 		self.__rightSon = value
 
 class RedWhiteTree():
+	NoneNode = RWTNoneNode()
 
 	def __init__(self):
-		self.__NoneNode = RWTNode(None, "white")
-		self.__NoneNode.father = self.NoneNode
-		self.__NoneNode.leftSon = self.NoneNode
-		self.__NoneNode.rightSon = self.NoneNode
 		self.__root = self.NoneNode
 
 	def __str__(self):
 		self.inOrderRecEngine(self.root)
-		return "\n"
+		return ""
 
 	@property
 	def root(self):
@@ -257,13 +260,13 @@ class RedWhiteTree():
 	def root(self, value):
 		self.__root = value
 	
-	@property
-	def NoneNode(self):
-		return self.__NoneNode
+	# @property
+	# def NoneNode(self):
+	# 	return self.__NoneNode
 	
-	@NoneNode.setter
-	def NoneNode(self, value):
-		self.__NoneNode = value
+	# @NoneNode.setter
+	# def NoneNode(self, value):
+	# 	self.__NoneNode = value
 
 	def isEmpty(self):
 		if self.root is self.NoneNode:
@@ -498,7 +501,8 @@ class RedWhiteTree():
 
 	def searchKey(self, key):
 		if self.isEmpty():
-			return print("The tree is empty!")
+			print("The tree is empty!")
+			return self.NoneNode
 		else:
 			node = self.root
 			while node is not self.NoneNode:
