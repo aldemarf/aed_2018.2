@@ -8,34 +8,35 @@
 
 
 ### BIBLIOTECA DE FUNCOES ###
+
 from libClasses import Book, User, RedWhiteTree
 import os, time
 
 usersBase = RedWhiteTree()
 booksBase = RedWhiteTree()
 
-def limpaTela():
+def cleanScreen():
     # LIMPA A TELA
     return os.system('cls' if os.name == 'nt' else 'clear')
 
-def validaFaixaInteiro(pergunta, inicio, fim):
+def validateEntry(question, start, end):
     # VALIDA A ENTRADA DE ACORDO COM UMA FAIXA DE INTEIROS RECEBIDA
     while True:
         try:
-            valor = int(input(pergunta))
-            if inicio <= valor <= fim:
-                return(valor)
+            value = int(input(question))
+            if start <= value <= end:
+                return(value)
             else:
-                pausaParaLeitura('\033[91mValor inválido, favor digitar entre {} e {}\033[0m'.format(inicio, fim), 2)
+                pauseForRead('\033[91mINVALID VALUE. PLEASE ENTER BETWEEN {} AND {}\033[0m'.format(start, end), 2)
         except ValueError:
             print()
-            pausaParaLeitura('\033[91mValor inválido, favor digitar entre {} e {}\033[0m'.format(inicio, fim), 2)
+            pauseForRead('\033[91mINVALID VALUE. PLEASE ENTER BETWEEN {} AND {}\033[0m'.format(start, end), 2)
     return
 
-def pausaParaLeitura(texto, tempo=5):
+def pauseForRead(text, time=5):
     # PAUSA PROGRAMA PARA LEITURA DE MENSAGENS
-    print ('{}'.format(texto))
-    time.sleep(tempo)
+    print ('{}'.format(text))
+    time.sleep(time)
 
 
 def loadBooksDatabase():
@@ -52,7 +53,7 @@ def addUser(usersBase):
 	userPassword = input("Senha: ")
 	user = User(userName, userPassword)
 	userID = user.key
-	print("\n USER \"{}\" REGISTRED AT THE ID \033[91m\"{}\"\033[0m".format(userName, userID))
+	print("\n USER \"{}\" registred at the id \033[91m\"{}\"\033[0m".format(userName, userID))
 	usersBase.Insert(user)
 
 
@@ -62,15 +63,27 @@ def addBook(booksBase):
 	bookID = book.key
 	try:
 		if booksBase.searchValue(book) is not booksBase.NoneNode:
-			return("\nBOOK ALREADY REGISTERED.")
+			return("\nBook already registered.")
 	except ValueError:
 		pass
 	booksBase.Insert(book)
-	print("\nBOOK REGISTRED AT THE ID \"{}\".".format(bookID))
+	print("\nBook registred at the id \"{}\".".format(bookID))
 
 
-def withdrawBook(usersBase,booksBase,userKey):
-	user = usersBase.SearchKey(userKey)
+def borrowedBooks(usersBase,loggedUser):
+    if loggedUser is None:
+        return pauseForRead("No user logged.")        
+
+    print("\n--------------------  LIVROS  --------------------")
+
+    for bookID, bookTitle in loggedUser.books.items():
+        print("{} -- {}".format(bookID, bookTitle))
+    
+    print("-----------------------  X  -----------------------")
+
+
+def withdrawBook(usersBase, booksBase, loggedUser):
+	user = loggedUser
 
 	if user is usersBase.NoneNode:
 		return print("Invalid user ID.")
@@ -78,7 +91,7 @@ def withdrawBook(usersBase,booksBase,userKey):
 	bookID = -1
 
 	while bookID != 0:
-		limpaTela()
+		cleanScreen()
 		bookID = int(input("ID do livro: (0 - exit)"))
 		book = booksBase.SearchKey(bookID)
 		if book is booksBase.NoneNode:
@@ -89,97 +102,140 @@ def withdrawBook(usersBase,booksBase,userKey):
 	if book.isAvailable:
 		if user.loans >= 5:
 			print("\nYou have passed loans' limit.")
-
-			user.set_empSoma()
-			book.set_status(False)
-			user.set_livros(book.get_name())
-			user.set_livrosId(book.get_id())
-			print("\nBook withdrawn.")
 		else:
 			user.withdrawBook(book.key, book.title)
 			book.copies -= 1
+			print("\nBook withdrawn.")
 	else:
 		print("\nUnavailable book.")
 
 
+def returnBook(usersBase, booksBase, loggedUser):
+	user = loggedUser
 
+	if user is usersBase.NoneNode:
+		return print("Invalid user ID.")
+
+	bookID = -1
+	while bookID != 0:
+		print("\nSelect the book to return (0 - exit)")
+
+		for bookCode, bookTitle in user.books.items():
+			print("{:d} : {:s}".format(bookCode, bookTitle))
+
+		bookID = int(input("Book ID: "))
+		
+		if bookID == 0:
+			return
+
+		book = booksBase.SearchKey(bookID)
+		if book is booksBase.NoneNode:
+			print("\nInvalid book ID. Try again.")
+			continue
+		else:
+			break
+
+	user.returnBook(book.key)
+	book.returnBook()
+	print("\nBook returned.")
+	
+
+def removeUser(usersBase):
+	while True:
+		userKey = int(input("User ID: "))
+		user = usersBase.SearchKey(userKey)
+		
+		if user is usersBase.NoneNode:
+			print("\nInvalid user!")
+			continue
+		else:
+			break
+		
+	while True:
+		userPassword = input("Password: (0 - exit)")
+
+		if userPassword == 0:
+			return
+
+		if userPassword == user.password:
+			usersBase.remove(user.key)
+			return print("\nUser removed.")
+		else:
+			print("\nInvalid password. Try Again.")
+			continue
+
+def removeBook(booksBase):
+	print("\nCollection\n")
+	print(booksBase)
+
+	while True:
+		bookKey = int(input("Book ID: (0 - Exit)"))
+
+		if bookKey == 0:
+			return
+		
+		book = booksBase.SearchKey(bookKey)
+		if book is booksBase.NoneNode:
+			print("\nInvalid book ID.")
+			continue
+		else:
+			break
+			
+	if book.borrowedCopies == 0:
+		booksBase.remove(bookKey)
+		print("\nBook removed.\n")
+	else:
+		print("\nYou can't remove books who has borrowed copies!")
+
+
+def userLogin(usersBase):
+	while True:		
+		userKey = int(input("User ID: (0 - Exit)"))		
+		if userKey == 0:
+			return
+
+		user = usersBase.SearchKey(userKey)
+		if user is usersBase.NoneNode:
+			print("\nInvalid user ID.")
+			continue
+		else:
+			break
+
+	while True:
+		password = input("Password: (0 - Exit)")
+
+		if password == 0:
+			return
+		
+		if password == user.password:
+			print("\nUSER LOGGED.")
+			return user
+
+def adminLogin(usersBase):
+	
+	while True:		
+		userKey = input("User ID: (0 - Exit)")
+		if userKey == 0:
+			return
+		
+		user = usersBase.searchKey(userKey)
+		if user is usersBase.NoneNode:
+			print("\nInvalid user ID.")
+			continue
+		elif not user.isAdmin():
+			return print("User isn't a admin.")
+		else:
+			break
+
+	while True:
+		password = input("Password: ")
+		
+		if password == user.password:
+			print("ADMIN LOGGED.")
+			return user
+		else:
+			print("\nInvalid password!")
 
 #   #####################################################################
 #  # REDACT	  REDACT		REDACT		REDACT		REDACT		REDACT #
 # #####################################################################
-
-
-
-
-def devolver_livro(TreeU,TreeL,l):
-	while True:
-		IdUser=l
-		user = TreeU.SearchId(TreeU.get_root(),IdUser).get_key()
-		print("\nEsses são os livros que estão em sua conta: ")
-		for i in range(len(user.get_livros())):
-			print("%d - %s"%(user.get_livrosId()[i],user.get_livros()[i]))
-		IdLivro=int(input("Digite o Id do livro: "))
-		book = TreeL.SearchId(TreeL.get_root(),IdLivro).get_key()
-		if user != None and book != None:
-			print('\n"{}" devolvido com sucesso!'.format(book.get_name()))
-			break
-		else:
-			print("\nId do Usuário ou do livro inválido")
-	if book.get_name() in user.get_livros():
-		book.set_status(True)
-		user.set_empSub()
-		user.remove_livro(book.get_name())
-		user.remove_livroId(IdLivro)
-	else:
-		 print("\nVocê não pegou este livro")
-
-def deletar_usuario(TreeU):
-	user = int(input("Digite seu ID: "))
-	nodo = TreeU.SearchId(TreeU.get_root(), user).get_key()
-	if nodo==None:
-		print("\nERRO: Este usuário não existe em nosso banco de dados")
-	else:
-		senha = input("Digite sua senha: ")
-		if senha==nodo.get_senha():
-			deletar = TreeU.Delete(user)
-			print("\nUsuário excluído com sucesso")
-		else:
-			print("\nERRO: Esta senha não é compatível com o ID digitado")
-
-def deletar_livro(TreeL):
-	print("\nEsses são os livros da biblioteca:")
-	TreeL.Inorder_books(TreeL.get_root())
-	livro = int(input("Digite o ID do livro (número): "))
-	x = TreeL.SearchId(TreeL.get_root(),livro)
-	x = x.get_key()
-	if x == None:
-		print("\nLivro não existe")
-	else:
-		if x.get_status():
-			TreeL.Delete(livro)
-			print('\nLivro excluído da biblioteca com sucesso!')
-			print("\nNova lista de livros:")
-			TreeL.Inorder_books(TreeL.get_root())
-		else:
-			print("\nO livro está emprestado e não poderá ser deletado")
-
-def Logar(TreeU):
-	user = int(input("Digite seu id: "))
-	nodo = TreeU.SearchId(TreeU.get_root(), user).get_key()
-	if nodo==None:
-		print("\nERRO: Este usuário não existe em nosso banco de dados")
-	else:
-		senha = input("Digite sua senha: ")
-		if senha==nodo.get_senha():
-			print("\nBem vindo %s"%(nodo.get_name()))
-			return user
-		else:
-			return 0
-
-def LogarProp(a,b):
-	user = input("Digite seu id: ")
-	senha = input("Digite sua senha: ")
-	if user==a and senha==b:
-		return True
-	else:
-		return False

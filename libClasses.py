@@ -13,14 +13,19 @@
 class User:
 	userSequential = 0
 
-	def __init__(self, name, password):
+	def __init__(self, name, password, admin=False):
 		User.userSequential += 1
 		self.__key = User.userSequential
 		self.__name = name
-		self.__loans = 0
-		self.__books = {}
+		self.__admin = admin
 		self.__password = password
+		self.__loans = 0
+		self.__books = {}		
 
+	
+	def __str__(self):
+		return print("{} : {}".format(self.key, self.name))
+	
 	@property
 	def key(self):
 		return self.__key
@@ -40,6 +45,10 @@ class User:
 	@password.setter
 	def password(self, password):
 		self.__password = password
+
+	@property
+	def isAdmin(self):
+		return self.__admin
 
 	@property
 	def loans(self):
@@ -91,8 +100,13 @@ class Book:
 		self.__key = Book.bookSequential
 		self.__title = title
 		self.__copies = copies
+		self.__borrowedCopies = 0
+		self.__availableCopies = copies
 		self.__available = True
 
+	def __str__(self):
+		return print("{} : {} -- Copies:{} -- Borrowed Copies: {}".format(self.key, self.title, self.copies, self.borrowedCopies))
+	
 	@property
 	def key(self):
 		return self.__key
@@ -105,9 +119,32 @@ class Book:
 	def copies(self):
 		return self.__copies
 
-	@copies.setter
-	def copies(self, copies):
-		self.__copies = copies
+	@property
+	def borrowedCopies(self):
+		return self.__borrowedCopies
+	
+	@borrowedCopies.setter
+	def borrowedCopies(self, returned):
+		self.__borrowedCopies = returned
+		
+	@property
+	def availableCopies(self):
+		return self.__availableCopies	
+	
+	def __updateAvailableCopies(self):
+		self.availableCopies = self.copies - self.borrowedCopies
+		
+		if self.availableCopies > 0:
+			self.isAvailable = True
+		else:
+			self.isAvailable = False
+	
+	def returnBook(self):
+		self.borrowedCopies -= 1
+		self.__updateAvailableCopies()
+
+		
+
 
 	@property
 	def isAvailable(self):
@@ -130,15 +167,15 @@ class RWTNoneNode:
 		return self.__color
 
 class RWTNode:
-	NoneNode = RWTNoneNode()
-
-	def __init__(self, data, color):
+	
+	def __init__(self, data, color, NoneNode):
 		self.__color = color
 		self.__data = data
-		self.__height = self.NoneNode
-		self.__father = self.NoneNode
-		self.__leftSon = self.NoneNode
-		self.__rightSon = self.NoneNode
+		self.__height = NoneNode
+		self.__father = NoneNode
+		self.__leftSon = NoneNode
+		self.__rightSon = NoneNode
+		self.NoneNode = NoneNode
 
 	@property
 	def color(self):
@@ -237,7 +274,7 @@ class RedWhiteTree():
 		return self.root.isLeaf()
 
 	def insertNode(self, value):
-		newNode = RWTNode(value, "red")
+		newNode = RWTNode(value, "red", self.NoneNode)
 		node = self.root
 		father = self.NoneNode
 
@@ -268,7 +305,7 @@ class RedWhiteTree():
 			else:
 				self.insertNodeRec(value, node.rightSon, node)
 		else:
-			newNode = RWTNode(value, "red")
+			newNode = RWTNode(value, "red", self.NoneNode)
 			newNode.father = father
 
 			if father is None:
@@ -342,7 +379,7 @@ class RedWhiteTree():
 
 	def searchValue(self, value):
 		if self.isEmpty():
-			raise RuntimeError("The tree is empty!")
+			return print("The tree is empty!")
 		else:
 			node = self.root
 			while node is not self.NoneNode:
@@ -352,11 +389,12 @@ class RedWhiteTree():
 					node = node.rightSon
 				else:
 					return node
-			raise ValueError("Element not found!")
+			
+			return self.NoneNode
 
 	def searchKey(self, key):
 		if self.isEmpty():
-			raise RuntimeError("The tree is empty!")
+			return print("The tree is empty!")
 		else:
 			node = self.root
 			while node is not self.NoneNode:
@@ -366,7 +404,8 @@ class RedWhiteTree():
 					node = node.rightSon
 				else:
 					return node
-			raise ValueError("Key not found!")
+
+			return self.NoneNode
 
 
 	def order(self, node=None, method="ino"):
@@ -380,13 +419,13 @@ class RedWhiteTree():
 		elif method.lower() == "pos":
 			self.posOrderRecEngine(node)
 		else:
-			raise ValueError("Order method not valid!")
+			return print("Order method not valid!")
 
 
 	def inOrderRecEngine(self, node):
 		if node is not self.NoneNode:
 			self.inOrderRecEngine(node.leftSon)
-			print(node.data,end=" ")
+			print("{}".format(node.data))
 			self.inOrderRecEngine(node.rightSon)
 
 	def preOrderRecEngine(self, node):
@@ -407,7 +446,7 @@ class RedWhiteTree():
 			node = self.root
 
 		if self.isEmpty():
-			raise ValueError("Empty tree!")
+			return print("The tree is empty!")
 		else:
 			while node.rightSon is not self.NoneNode:
 				node = node.rightSon
@@ -418,7 +457,7 @@ class RedWhiteTree():
 			node = self.root
 
 		if self.isEmpty():
-			raise ValueError("Empty tree!")
+			return print("The tree is empty!")
 		else:
 			while node.leftSon is not self.NoneNode:
 				node = node.leftSon
@@ -433,8 +472,7 @@ class RedWhiteTree():
 			node = self.searchValue(value)
 
 		if self.isOnlyRoot():
-			print("Root hasn't predecessors!")
-			return
+			return print("Root hasn't predecessors!")
 
 		if node.hasLeftSon():
 			return self.maximum(node.leftSon)
@@ -619,7 +657,7 @@ class RedWhiteTree():
 		self.root().set_cor("BLACK")
 
 
-	def Delete_Fixup(self, x):
+	def removeFix(self, x):
 		while x != self.root() and x.get_cor() == "BLACK":
 			if x == x.get_p().get_left():
 				w = x.get_p().get_right()
@@ -665,8 +703,8 @@ class RedWhiteTree():
 						x = self.root()
 		x.set_cor("BLACK")
 
-	def Delete(self,ID):
-		z = self.SearchId(self.root(), ID)
+	def remove(self,key):
+		z = self.SearchId(self.root(), key)
 		if z == self.NoneNode:
 			return 0
 		if z.get_left() == self.NoneNode or z.get_right() == self.NoneNode:
@@ -688,7 +726,7 @@ class RedWhiteTree():
 		if y != z:
 			z.set_key(y.get_key())
 		if y.get_cor() == "BLACK":
-			self.Delete_Fixup(x)
+			self.removeFix(x)
 		return y
 
 	def Left_Rotate(self, x):
