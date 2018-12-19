@@ -34,15 +34,19 @@ def validateEntry(question, start, end):
 			pauseForRead('\033[91mINVALID VALUE. PLEASE ENTER BETWEEN {} AND {}\033[0m'.format(start, end), 2)
 	return
 
-def pauseForRead(text, time=1.5):
+def pauseForRead(text, time=1.5, end="\n"):
 	# PAUSA PROGRAMA PARA LEITURA DE MENSAGENS
-	print ('{}'.format(text))
+	print ('{}'.format(text), end=end)
 	sleep(time)
 
 
 def loadBooksDatabase():
 	booksBase = RedWhiteTree()
-	with open("books.base","r",encoding = "UTF-8") as booksFile:
+
+	currentFileDir = os.path.dirname(__file__)
+	filePath = os.path.join(currentFileDir, "books.base")
+
+	with open(filePath,"r",encoding = "UTF-8") as booksFile:
 		booksFileContent = booksFile.readlines()
 
 	for item  in booksFileContent:
@@ -52,7 +56,11 @@ def loadBooksDatabase():
 
 def loadUsersDatabase():
 	usersBase = RedWhiteTree()
-	with open("users.base","r",encoding = "UTF-8") as usersFile:
+
+	currentFileDir = os.path.dirname(__file__)
+	filePath = os.path.join(currentFileDir, "users.base")
+
+	with open(filePath,"r",encoding = "UTF-8") as usersFile:
 		usersFileContent = usersFile.readlines()
 
 	for item  in usersFileContent:
@@ -99,12 +107,12 @@ def listBooks(booksBase):
 
 def borrowedBooks(usersBase, loggedUser=None):
 	if loggedUser is None:
-		return pauseForRead("No user logged.")        
+		return pauseForRead("No user logged.")
 
 	print("\n--------------------  LIVROS  --------------------\n")
 	for bookID, bookTitle in loggedUser.books.items():
-		print("{} -- {}".format(bookID, bookTitle))	
-	print("\n-----------------------  X  -----------------------")	
+		print("{} -- {}".format(bookID, bookTitle))
+	print("\n-----------------------  X  -----------------------")
 	input("Press Enter to return...")
 
 
@@ -152,7 +160,7 @@ def returnBook(usersBase, booksBase, loggedUser):
 			print("{:d} : {:s}".format(bookCode, bookTitle))
 
 		bookID = int(input("Book ID: "))
-		
+
 		if bookID == 0:
 			return
 
@@ -166,37 +174,42 @@ def returnBook(usersBase, booksBase, loggedUser):
 	user.returnBook(book.key)
 	book.returnBook()
 	pauseForRead("\nBook returned.")
-	
+
 
 def removeUser(usersBase):
-	cleanScreen()
 	while True:
 		cleanScreen()
-		userKey = int(input("User ID: "))
-		user = usersBase.searchKey(userKey).data
+		print("\n{:-^30}\n".format("  Users  "))
+		print(usersBase)
 		
+		userKey = int(input("User ID: (0 - Exit)   "))
+		if userKey == 0:
+			return
+
+		user = usersBase.searchKey(userKey).data
+
 		if user is usersBase.NoneNode:
 			pauseForRead("\nInvalid user!")
 			continue
 		else:
 			break
-		
-	while True:
-		userPassword = input("\nPassword: (0 - exit)   ")
 
-		if userPassword == 0:
+	while True:
+		userPassword = input("Password: (0 - exit)   ")
+
+		if userPassword == "0":
 			return
 
 		if userPassword == user.password:
-			usersBase.remove(user.key)
+			usersBase.removeNode(user.key)
 			return pauseForRead("\nUser removed.")
 		else:
-			pauseForRead("\nInvalid password. Try Again.")
+			pauseForRead("Invalid password.", end="\r")
 			continue
 
 def removeBook(booksBase):
 	cleanScreen()
-	print("\nCollection\n")
+	print("\n{:-^30}\n".format("  Collection  "))
 	print(booksBase)
 
 	while True:
@@ -204,14 +217,14 @@ def removeBook(booksBase):
 
 		if bookKey == 0:
 			return
-		
+
 		book = booksBase.searchKey(bookKey).data
 		if book is booksBase.NoneNode:
 			pauseForRead("\nInvalid book ID.")
 			continue
 		else:
 			break
-			
+
 	if book.borrowedCopies == 0:
 		booksBase.removeNode(bookKey)
 		pauseForRead("\nBook removed.\n")
@@ -220,43 +233,49 @@ def removeBook(booksBase):
 
 
 def userLogin(usersBase):
-	while True:		
-		userKey = int(input("\nUser ID: (0 - Exit)   "))		
+	while True:
+		userKey = int(input("\nUser ID: (0 - Exit)   "))
 		if userKey == 0:
 			return
-		
+
 		if usersBase.isEmpty():
 			return pauseForRead("Empty tree!")
 
 		user = usersBase.searchKey(userKey).data
 		if user is usersBase.NoneNode:
 			pauseForRead("\nInvalid user ID.")
+			print("\r\r")
 			continue
 		else:
 			break
 
 	while True:
-		password = input("\nPassword: (0 - Exit)   ")
+		password = int(input("\nPassword: (0 - Exit)   "))
 
 		if password == 0:
 			return
-		
+
 		if password == user.password:
 			pauseForRead("\nUSER LOGGED.")
 			return userMenu(user, usersBase, booksBase)
+		else:
+			pauseForRead("Invalid password!", end="\r")
+			print("\r")
 
-def adminLogin(usersBase):	
-	while True:		
+def adminLogin(usersBase):
+	while True:
+		cleanScreen()
 		userKey = int(input("\nUser ID: (0 - Exit)   "))
 		if userKey == 0:
 			return
-		
+
 		if usersBase.isEmpty():
 			return pauseForRead("Empty tree!")
 
 		user = usersBase.searchKey(userKey).data
 		if user is usersBase.NoneNode:
 			pauseForRead("\nInvalid user ID.")
+			print("\r")
 			continue
 		elif not user.isAdmin:
 			return pauseForRead("User isn't a admin.")
@@ -264,21 +283,24 @@ def adminLogin(usersBase):
 			break
 
 	while True:
-		password = input("Password: ")
-		
+		password = int(input("Password: (0 - Exit)   "))
+
+		if password == 0:
+			return
+
 		if password == user.password:
 			pauseForRead("ADMIN LOGGED.")
 			return adminMenu(user, booksBase)
 		else:
-			pauseForRead("\nInvalid password!")
+			pauseForRead("Invalid password!", end="\r")
+			
 
 
 
 def MainMenu(usersBase, booksBase):
-	loggedUser = None
 	usersBase = usersBase
 	booksBase = booksBase
-	
+
 	MainMenu = {1: (adminLogin, (usersBase)),
 				2: (userLogin, (usersBase)),
 				3: (addUser, (usersBase)),

@@ -24,7 +24,7 @@ class User:
 
 	
 	def __str__(self):
-		return print("{} : {}".format(self.key, self.name))
+		return "{} : {} -- Pendent Books: {}".format(self.key, self.name, self.loans)
 	
 	@property
 	def key(self):
@@ -185,17 +185,29 @@ class RWTNoneNode:
 	@property
 	def father(self):
 		return self.__father
+	
+	@father.setter
+	def father(self, value):
+		self.__father = value
 
 	@property
 	def leftSon(self):
 		return self.__leftSon
+	
+	@leftSon.setter
+	def leftSon(self, value):
+		self.leftSon = value
 
 	@property
 	def rightSon(self):
 		return self.__rightSon
 
+	@rightSon.setter
+	def rightSon(self, value):
+		self.__rightSon = value
+
 class RWTNode:
-	def __init__(self, data, color):
+	def __init__(self, data=None, color="white"):
 		self.__color = color
 		self.__data = data
 		self.__father = None
@@ -243,7 +255,7 @@ class RWTNode:
 		self.__rightSon = value
 
 class RedWhiteTree():
-	NoneNode = RWTNoneNode()
+	NoneNode = RWTNode()
 
 	def __init__(self):
 		self.__root = self.NoneNode
@@ -260,14 +272,6 @@ class RedWhiteTree():
 	def root(self, value):
 		self.__root = value
 	
-	# @property
-	# def NoneNode(self):
-	# 	return self.__NoneNode
-	
-	# @NoneNode.setter
-	# def NoneNode(self, value):
-	# 	self.__NoneNode = value
-
 	def isEmpty(self):
 		if self.root is self.NoneNode:
 			return True
@@ -374,7 +378,7 @@ class RedWhiteTree():
 			if swap.father is node:
 				swap2.father = swap
 			else:
-				self.transplantNode(node, swap)
+				self.transplantNode(swap, swap.rightSon)
 				swap.rightSon = node.rightSon
 				swap.rightSon.father = swap
 		
@@ -384,41 +388,7 @@ class RedWhiteTree():
 			swap.color = node.color
 		
 		if swapOriginColor == "white":
-			self.removesFix(node)
-
-
-	# def remove(self, key):
-	# 	node = self.searchKey(key)
-		
-	# 	if node == self.NoneNode:
-	# 		return
-
-	# 	if node.leftSon == self.NoneNode or node.rightSon == self.NoneNode:
-	# 		swap = node
-	# 	else:
-	# 		swap = self.successor(node)
-
-	# 	if swap.leftSon != self.NoneNode:
-	# 		swap2 = swap.leftSon
-	# 	else:
-	# 		swap2 = swap.rightSon
-
-	# 	if swap2 != self.NoneNode:
-	# 		swap2.father = swap.father
-
-	# 	if swap.father == self.NoneNode:
-	# 		self.root = swap2
-	# 	elif swap == swap.father.leftSon:
-	# 		swap.father.leftSon = swap2
-	# 	else:
-	# 		swap.father.rightSon = swap2
-
-	# 	if swap != node:
-	# 		node.key = swap.key
-
-	# 	if swap.color == "white":
-	# 		self.removesFix(swap2)
-	# 	return
+			self.removesFix(swap2)
 
 
 	def removesFix(self, node):
