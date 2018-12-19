@@ -16,27 +16,27 @@ usersBase = RedWhiteTree()
 booksBase = RedWhiteTree()
 
 def cleanScreen():
-    # LIMPA A TELA
-    return os.system('cls' if os.name == 'nt' else 'clear')
+	# LIMPA A TELA
+	return os.system('cls' if os.name == 'nt' else 'clear')
 
 def validateEntry(question, start, end):
-    # VALIDA A ENTRADA DE ACORDO COM UMA FAIXA DE INTEIROS RECEBIDA
-    while True:
-        try:
-            value = int(input(question))
-            if start <= value <= end:
-                return(value)
-            else:
-                pauseForRead('\033[91mINVALID VALUE. PLEASE ENTER BETWEEN {} AND {}\033[0m'.format(start, end), 2)
-        except ValueError:
-            print()
-            pauseForRead('\033[91mINVALID VALUE. PLEASE ENTER BETWEEN {} AND {}\033[0m'.format(start, end), 2)
-    return
+	# VALIDA A ENTRADA DE ACORDO COM UMA FAIXA DE INTEIROS RECEBIDA
+	while True:
+		try:
+			value = int(input(question))
+			if start <= value <= end:
+				return(value)
+			else:
+				pauseForRead('\033[91mINVALID VALUE. PLEASE ENTER BETWEEN {} AND {}\033[0m'.format(start, end), 2)
+		except ValueError:
+			print()
+			pauseForRead('\033[91mINVALID VALUE. PLEASE ENTER BETWEEN {} AND {}\033[0m'.format(start, end), 2)
+	return
 
 def pauseForRead(text, time=5):
-    # PAUSA PROGRAMA PARA LEITURA DE MENSAGENS
-    print ('{}'.format(text))
-    time.sleep(time)
+	# PAUSA PROGRAMA PARA LEITURA DE MENSAGENS
+	print ('{}'.format(text))
+	time.sleep(time)
 
 
 def loadBooksDatabase():
@@ -71,20 +71,20 @@ def addBook(booksBase):
 
 
 def listBooks(booksBase):
-    print("\n--------------------  LIVROS  --------------------")
-    booksBase.order()    
-    print("-----------------------  X  -----------------------")
+	print("\n--------------------  LIVROS  --------------------")
+	booksBase.order()    
+	print("-----------------------  X  -----------------------")
 
-def borrowedBooks(usersBase,loggedUser):
-    if loggedUser is None:
-        return pauseForRead("No user logged.")        
+def borrowedBooks(usersBase, loggedUser=None):
+	if loggedUser is None:
+		return pauseForRead("No user logged.")        
 
-    print("\n--------------------  LIVROS  --------------------")
+	print("\n--------------------  LIVROS  --------------------")
 
-    for bookID, bookTitle in loggedUser.books.items():
-        print("{} -- {}".format(bookID, bookTitle))
-    
-    print("-----------------------  X  -----------------------")
+	for bookID, bookTitle in loggedUser.books.items():
+		print("{} -- {}".format(bookID, bookTitle))
+	
+	print("-----------------------  X  -----------------------")
 
 
 def withdrawBook(usersBase, booksBase, loggedUser):
@@ -214,10 +214,9 @@ def userLogin(usersBase):
 		
 		if password == user.password:
 			print("\nUSER LOGGED.")
-			return user
+			return userMenu(user, usersBase, booksBase)
 
-def adminLogin(usersBase):
-	
+def adminLogin(usersBase):	
 	while True:		
 		userKey = input("User ID: (0 - Exit)")
 		if userKey == 0:
@@ -237,10 +236,92 @@ def adminLogin(usersBase):
 		
 		if password == user.password:
 			print("ADMIN LOGGED.")
-			return user
+			return adminMenu(user, booksBase)
 		else:
 			print("\nInvalid password!")
 
-#   #####################################################################
-#  # REDACT	  REDACT		REDACT		REDACT		REDACT		REDACT #
-# #####################################################################
+
+
+def MainMenu():
+	loggedUser = None
+	usersBase = RedWhiteTree()
+	booksBase = RedWhiteTree()
+	
+	MainMenu = {1: adminLogin(usersBase),
+				2: userLogin(usersBase),
+				3: addUser(usersBase),
+				4: removeUser(usersBase)
+				}
+
+	option = -1
+	while True:
+		cleanScreen()
+		print('''
+-----------------------
+-     \033[1m   MENU    \033[0m     -
+-----------------------
+ 1 : Admin Login
+ 2 : User Login
+ 2 : Create User
+ 3 : Remove User
+-----------------------
+ 0 : EXIT
+-----------------------
+''')
+		option = validateEntry("Option: ",0,4)
+		if option == 0:
+			return None
+		MainMenu[option]
+
+
+def userMenu(loggedUser, usersBase, booksBase):
+	UserMenu = {1: borrowedBooks(usersBase, loggedUser),
+				2: withdrawBook(usersBase, booksBase, loggedUser),
+				3: returnBook(usersBase, booksBase, loggedUser)
+				}
+
+	option = -1
+	while True:
+		cleanScreen()
+		print('''
+-----------------------
+-     \033[1m   USER    \033[0m     -
+-----------------------
+ 1 : Borrowed Books
+ 2 : Withdraw Books
+ 3 : Return Books
+-----------------------
+ 0 : EXIT
+-----------------------
+''')
+		option = validateEntry("Option: ",0,3)
+		if option == 0:
+			loggedUser = usersBase.NoneNode
+			return loggedUser, usersBase, booksBase
+		UserMenu[option]
+
+def adminMenu(loggedUser, booksBase):
+	AdminMenu = {1: addBook(booksBase),
+				 2: removeBook(booksBase),
+				 3: listBooks(booksBase)
+				}
+
+	option = -1
+	while True:
+		cleanScreen()
+		print('''
+-----------------------
+-     \033[1m   ADMIN   \033[0m     -
+-----------------------
+ 1 : Add Book
+ 2 : Remove Book
+ 3 : List Books
+-----------------------
+ 0 : EXIT
+-----------------------
+''')
+		option = validateEntry("Option: ",0,3)
+		if option == 0:
+			loggedUser = usersBase.NoneNode
+			return loggedUser, booksBase
+		AdminMenu[option]
