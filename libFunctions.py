@@ -13,8 +13,8 @@ from libClasses import Book, User, RedWhiteTree
 from time import sleep
 import os
 
-usersBase = RedWhiteTree()
-booksBase = RedWhiteTree()
+# usersBase = RedWhiteTree()
+# booksBase = RedWhiteTree()
 
 def cleanScreen():
 	# LIMPA A TELA
@@ -43,20 +43,22 @@ def pauseForRead(text, time=1.5):
 def loadBooksDatabase():
 	booksBase = RedWhiteTree()
 	with open("books.base","r",encoding = "UTF-8") as booksFile:
-		bookBase = booksFile.readlines()
+		booksFileContent = booksFile.readlines()
 
-	for item  in bookBase:
+	for item  in booksFileContent:
 		book = Book(*item.split())
 		booksBase.insertNode(book)
+	return booksBase
 
 def loadUsersDatabase():
 	usersBase = RedWhiteTree()
 	with open("users.base","r",encoding = "UTF-8") as usersFile:
-		userBase = usersFile.readlines()
+		usersFileContent = usersFile.readlines()
 
-	for item  in userBase:
+	for item  in usersFileContent:
 		user = User(*item.split())
 		usersBase.insertNode(user)
+	return usersBase
 
 
 def addUser(usersBase):
@@ -90,19 +92,19 @@ def addBook(booksBase):
 
 def listBooks(booksBase):
 	cleanScreen()
-	print("\n--------------------  LIVROS  --------------------")
-	booksBase.order()    
-	print("-----------------------  X  -----------------------")
+	print("\n--------------------  LIVROS  --------------------\n")
+	print(booksBase)
+	print("\n-----------------------  X  -----------------------")
 	input("Press Enter to return...")
 
 def borrowedBooks(usersBase, loggedUser=None):
 	if loggedUser is None:
 		return pauseForRead("No user logged.")        
 
-	print("\n--------------------  LIVROS  --------------------")
+	print("\n--------------------  LIVROS  --------------------\n")
 	for bookID, bookTitle in loggedUser.books.items():
 		print("{} -- {}".format(bookID, bookTitle))	
-	print("-----------------------  X  -----------------------")	
+	print("\n-----------------------  X  -----------------------")	
 	input("Press Enter to return...")
 
 
@@ -117,6 +119,8 @@ def withdrawBook(usersBase, booksBase, loggedUser):
 	while bookID != 0:
 		cleanScreen()
 		bookID = int(input("Book ID: (0 - exit)   "))
+		if bookID == 0:
+			return
 		book = booksBase.searchKey(bookID)
 		if book is booksBase.NoneNode:
 			pauseForRead("Invalid book ID. Try again.")
@@ -201,7 +205,7 @@ def removeBook(booksBase):
 		if bookKey == 0:
 			return
 		
-		book = booksBase.searchKey(bookKey)
+		book = booksBase.searchKey(bookKey).data
 		if book is booksBase.NoneNode:
 			pauseForRead("\nInvalid book ID.")
 			continue
@@ -270,10 +274,10 @@ def adminLogin(usersBase):
 
 
 
-def MainMenu():
+def MainMenu(usersBase, booksBase):
 	loggedUser = None
-	usersBase = RedWhiteTree()
-	booksBase = RedWhiteTree()
+	usersBase = usersBase
+	booksBase = booksBase
 	
 	MainMenu = {1: (adminLogin, (usersBase)),
 				2: (userLogin, (usersBase)),
@@ -357,6 +361,5 @@ def adminMenu(loggedUser, booksBase):
 		function, arguments = AdminMenu[option]
 		function(arguments)
 
-loadBooksDatabase()
-loadUsersDatabase()
-input()
+booksBase = loadBooksDatabase()
+usersBase = loadUsersDatabase()

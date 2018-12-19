@@ -9,10 +9,11 @@
 
 ### MAIN SCRIPT ###
 
-from libFunctions import MainMenu
+from libFunctions import MainMenu, booksBase, usersBase
 
 #   #####################################################################
 #  #                                MAIN                               #
 # #####################################################################
 
-MainMenu()
+
+MainMenu(usersBase=usersBase, booksBase=booksBase)
