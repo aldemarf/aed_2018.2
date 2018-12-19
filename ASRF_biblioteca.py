@@ -113,7 +113,7 @@ def userMenu(user,liv,l):
         print("========================================")
         ent=input("Digite sua escolha: ")
         if ent=="1":
-            borrowedBooks(user,l)
+            listBooks(user,l)
             continue
         if ent=="2":
             try:

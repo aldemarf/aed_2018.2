@@ -70,6 +70,11 @@ def addBook(booksBase):
 	print("\nBook registred at the id \"{}\".".format(bookID))
 
 
+def listBooks(booksBase):
+    print("\n--------------------  LIVROS  --------------------")
+    booksBase.order()    
+    print("-----------------------  X  -----------------------")
+
 def borrowedBooks(usersBase,loggedUser):
     if loggedUser is None:
         return pauseForRead("No user logged.")        

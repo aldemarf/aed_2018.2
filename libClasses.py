@@ -430,7 +430,7 @@ class RedWhiteTree():
 
 	def preOrderRecEngine(self, node):
 		if node is not self.NoneNode:
-			print(node.data,end=" ")
+			print("{}".format(node.data))
 			self.inOrderRecEngine(node.leftSon)
 			self.inOrderRecEngine(node.rightSon)
 
@@ -438,7 +438,7 @@ class RedWhiteTree():
 		if node is not self.NoneNode:
 			self.inOrderRecEngine(node.leftSon)
 			self.inOrderRecEngine(node.rightSon)
-			print(node.data,end=" ")
+			print("{}".format(node.data))
 
 
 	def maximum(self, node=None):
