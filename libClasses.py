@@ -73,7 +73,7 @@ class User:
 
 	def returnBook(self, bookID=None, title=None):
 		if bookID is None and title is None:
-			raise ValueError("Enter a valid ID or Title!")
+			print("Enter a valid ID or Title!")
 		elif bookID is None:
 			for bookKey, bookTitle in self.__books.items():
 				if bookTitle == title:
@@ -158,6 +158,7 @@ class Book:
 class RWTNoneNode:
 	def __init__(self):
 		self.__color = "white"
+		self.__data = None
 		self.__father = self
 		self.__leftSon = self
 		self.__rightSon = self
@@ -165,17 +166,35 @@ class RWTNoneNode:
 	@property
 	def color(self):
 		return self.__color
+	
+	@color.setter
+	def color(self, color):
+		self.color = color
+
+	@property
+	def data(self):
+		return self.__data
+
+	@property
+	def father(self):
+		return self.__father
+
+	@property
+	def leftSon(self):
+		return self.__leftSon
+
+	@property
+	def rightSon(self):
+		return self.__rightSon
 
 class RWTNode:
 	
-	def __init__(self, data, color, NoneNode):
+	def __init__(self, data, color):
 		self.__color = color
 		self.__data = data
-		self.__height = NoneNode
-		self.__father = NoneNode
-		self.__leftSon = NoneNode
-		self.__rightSon = NoneNode
-		self.NoneNode = NoneNode
+		self.__father = None
+		self.__leftSon = None
+		self.__rightSon = None
 
 	@property
 	def color(self):
@@ -194,14 +213,6 @@ class RWTNode:
 		self.__data = data
 
 	@property
-	def height(self):
-		return self.__height
-
-	@height.setter
-	def height(self, height):
-		self.__height = height
-
-	@property
 	def father(self):
 		return self.__father
 
@@ -212,6 +223,7 @@ class RWTNode:
 	@property
 	def leftSon(self):
 		return self.__leftSon
+
 	@leftSon.setter
 	def leftSon(self, value):
 		self.__leftSon = value
@@ -224,28 +236,13 @@ class RWTNode:
 	def rightSon(self, value):
 		self.__rightSon = value
 
-	def hasLeftSon(self):
-		return self.leftSon is not self.NoneNode
-
-	def hasRightSon(self):
-		return self.rightSon is not self.NoneNode
-
-	def isLeaf(self):
-		return self.leftSon is self.NoneNode and self.rightSon is self.NoneNode
-
-	def sons(self):
-		sons = 0
-		if self.hasLeftSon():
-			sons += 1
-		if self.hasRightSon():
-			sons += 1
-		return sons
-
-
 class RedWhiteTree():
-	NoneNode = RWTNoneNode()
 
 	def __init__(self):
+		self.__NoneNode = RWTNode(None, "white")
+		self.__NoneNode.father = self.NoneNode
+		self.__NoneNode.leftSon = self.NoneNode
+		self.__NoneNode.rightSon = self.NoneNode
 		self.__root = self.NoneNode
 
 	def __str__(self):
@@ -259,6 +256,14 @@ class RedWhiteTree():
 	@root.setter
 	def root(self, value):
 		self.__root = value
+	
+	@property
+	def NoneNode(self):
+		return self.__NoneNode
+	
+	@NoneNode.setter
+	def NoneNode(self, value):
+		self.__NoneNode = value
 
 	def isEmpty(self):
 		if self.root is self.NoneNode:
@@ -270,13 +275,13 @@ class RedWhiteTree():
 		return self.root.isLeaf()
 
 	def insertNode(self, value):
-		newNode = RWTNode(value, "red", self.NoneNode)
+		newNode = RWTNode(value, "red")
 		node = self.root
 		father = self.NoneNode
 
 		while node is not self.NoneNode:
 			father = node
-			if value.key <= node.data.key:
+			if newNode.data.key <= node.data.key:
 				node = node.leftSon
 			else:
 				node = node.rightSon
@@ -285,11 +290,13 @@ class RedWhiteTree():
 		if father is self.NoneNode:
 			self.root = newNode
 		else:
-			if value.key <= father.data.key:
+			if newNode.data.key <= father.data.key:
 				father.leftSon = newNode
 			else:
 				father.rightSon = newNode
 		
+		newNode.leftSon = self.NoneNode
+		newNode.rightSon = self.NoneNode
 		newNode.color = "red"		
 		self.insertFix(newNode)
 		return
@@ -334,7 +341,7 @@ class RedWhiteTree():
 		self.root.color = "white"
 
 	def transplantNode(self, node, node2):
-		if node is self.NoneNode:
+		if node.father is self.NoneNode:
 			self.root = node2
 		elif node is node.father.leftSon:
 			node.father.leftSon = node2
@@ -344,7 +351,7 @@ class RedWhiteTree():
 		node2.father = node.father
 
 	
-	def remove(self, key):
+	def removeNode(self, key):
 		node = self.searchKey(key)
 
 		swap = node
@@ -375,6 +382,41 @@ class RedWhiteTree():
 		
 		if swapOriginColor == "white":
 			self.removesFix(node)
+
+
+	def remove(self, key):
+		node = self.searchKey(key)
+		
+		if node == self.NoneNode:
+			return
+
+		if node.leftSon == self.NoneNode or node.rightSon == self.NoneNode:
+			swap = node
+		else:
+			swap = self.successor(node)
+
+		if swap.leftSon != self.NoneNode:
+			swap2 = swap.leftSon
+		else:
+			swap2 = swap.rightSon
+
+		if swap2 != self.NoneNode:
+			swap2.father = swap.father
+
+		if swap.father == self.NoneNode:
+			self.root = swap2
+		elif swap == swap.father.leftSon:
+			swap.father.leftSon = swap2
+		else:
+			swap.father.rightSon = swap2
+
+		if swap != node:
+			node.key = swap.key
+
+		if swap.color == "white":
+			self.removesFix(swap2)
+		return
+
 
 	def removesFix(self, node):
 		while node is not self.root and node.color == "white":

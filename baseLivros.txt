@@ -1,0 +1,7 @@
+abc 1
+abcd 1
+abd 2
+afe 3
+asd 3
+kla 1
+pse 5
