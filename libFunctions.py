@@ -42,7 +42,11 @@ def pauseForRead(text, time=1.5, end="\n"):
 
 def loadBooksDatabase():
 	booksBase = RedWhiteTree()
-	with open("books.base","r",encoding = "UTF-8") as booksFile:
+
+	currentFileDir = os.path.dirname(__file__)
+	filePath = os.path.join(currentFileDir, "books.base")
+
+	with open(filePath,"r",encoding = "UTF-8") as booksFile:
 		booksFileContent = booksFile.readlines()
 
 	for item  in booksFileContent:
@@ -52,7 +56,11 @@ def loadBooksDatabase():
 
 def loadUsersDatabase():
 	usersBase = RedWhiteTree()
-	with open("users.base","r",encoding = "UTF-8") as usersFile:
+
+	currentFileDir = os.path.dirname(__file__)
+	filePath = os.path.join(currentFileDir, "users.base")
+
+	with open(filePath,"r",encoding = "UTF-8") as usersFile:
 		usersFileContent = usersFile.readlines()
 
 	for item  in usersFileContent:
