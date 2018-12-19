@@ -384,38 +384,38 @@ class RedWhiteTree():
 			self.removesFix(node)
 
 
-	def remove(self, key):
-		node = self.searchKey(key)
+	# def remove(self, key):
+	# 	node = self.searchKey(key)
 		
-		if node == self.NoneNode:
-			return
+	# 	if node == self.NoneNode:
+	# 		return
 
-		if node.leftSon == self.NoneNode or node.rightSon == self.NoneNode:
-			swap = node
-		else:
-			swap = self.successor(node)
+	# 	if node.leftSon == self.NoneNode or node.rightSon == self.NoneNode:
+	# 		swap = node
+	# 	else:
+	# 		swap = self.successor(node)
 
-		if swap.leftSon != self.NoneNode:
-			swap2 = swap.leftSon
-		else:
-			swap2 = swap.rightSon
+	# 	if swap.leftSon != self.NoneNode:
+	# 		swap2 = swap.leftSon
+	# 	else:
+	# 		swap2 = swap.rightSon
 
-		if swap2 != self.NoneNode:
-			swap2.father = swap.father
+	# 	if swap2 != self.NoneNode:
+	# 		swap2.father = swap.father
 
-		if swap.father == self.NoneNode:
-			self.root = swap2
-		elif swap == swap.father.leftSon:
-			swap.father.leftSon = swap2
-		else:
-			swap.father.rightSon = swap2
+	# 	if swap.father == self.NoneNode:
+	# 		self.root = swap2
+	# 	elif swap == swap.father.leftSon:
+	# 		swap.father.leftSon = swap2
+	# 	else:
+	# 		swap.father.rightSon = swap2
 
-		if swap != node:
-			node.key = swap.key
+	# 	if swap != node:
+	# 		node.key = swap.key
 
-		if swap.color == "white":
-			self.removesFix(swap2)
-		return
+	# 	if swap.color == "white":
+	# 		self.removesFix(swap2)
+	# 	return
 
 
 	def removesFix(self, node):

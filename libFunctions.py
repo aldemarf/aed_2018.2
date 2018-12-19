@@ -84,7 +84,7 @@ def addBook(booksBase):
 			return pauseForRead("\nBook already registered.")
 	except ValueError:
 		pass
-	booksBase.Insert(book)
+	booksBase.insertNode(book)
 	pauseForRead("\nBook registred at the id \"{}\".".format(bookID))
 
 
