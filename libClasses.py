@@ -388,7 +388,7 @@ class RedWhiteTree():
 			swap.color = node.color
 		
 		if swapOriginColor == "white":
-			self.removesFix(node)
+			self.removesFix(swap2)
 
 
 	def removesFix(self, node):
