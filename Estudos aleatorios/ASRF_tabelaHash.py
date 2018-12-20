@@ -116,6 +116,9 @@ class HashTable:
 		item = HashChainUnity(key, value)
 		bucketAddress = self.__9Hash__(key)
 
+		if bucketAddress > self.size:
+			raise OverflowError
+
 		if self.table[bucketAddress] is None:
 			self.table = (bucketAddress, item)
 		else:
