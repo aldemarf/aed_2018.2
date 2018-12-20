@@ -13,7 +13,7 @@ class HashChainUnity:
 	@property
 	def key(self):
 		return self.__key
-	
+
 	@key.setter
 	def key(self, newKey):
 		self.__key = newKey
@@ -25,7 +25,7 @@ class HashChainUnity:
 	@value.setter
 	def value(self, newValue):
 		self.__value = newValue
-	
+
 	@property
 	def pair(self):
 		return (self.key, self.value)
@@ -38,7 +38,7 @@ class HashChainUnity:
 	@property
 	def next(self):
 		return self.__next
-	
+
 	@next.setter
 	def next(self, newValue):
 		self.__next = newValue
@@ -47,12 +47,12 @@ class HashChainUnity:
 class HashTable:
 	CONST = (1 + sqrt(5)) / 2 - 1
 	PRIME = 1453
-	
-	
+
+
 	def __init__(self, slots=1453):
 		self.__size = slots
 		self.__table = [None for a in range(slots)]
-	
+
 
 	def __9Hash__(self, key):
 		address = fmod(key, 9)
@@ -71,13 +71,21 @@ class HashTable:
 	def size(self):
 		return self.__size
 
+	@property
+	def table(self):
+		return self.__table
+
+	@table.setter
+	def table(self, hashValue, item):
+		self.__table[hashValue] = item
+
 	def sweepBucket(self, bucket, key):
 		pass
 
 
-	def insertValue(self, value):		
-		for bucket in range(self.size):
-			pass
+	def insertValue(self, key, value):
+		item = HashChainUnity(key, value)
+		self.table = (self.__9Hash__(key), item)
 
 
 
@@ -120,7 +128,7 @@ class HashTable:
 			self.table[slot] = HashEntry(key, value)
 		else:
 			self.rehash(entry, key, value)
-	
+
 	def get(self, key):
 		hash = self.hashing_function(key)
 		if not self.table[hash]: raise KeyError
@@ -139,21 +147,21 @@ class HashTable:
 		self.size = size
 		self.keys = [None] * self.size
 		self.values = [None] * self.size
-	  
+
 	def hash_function(self, key):
 		return hash(key) % self.size
-	
+
 	def get_slot(self, key):
 		slot = self.hash_function(key)
 		while self.keys[slot] and self.keys[slot] != key:
 			slot = self.hash_function(slot + 1)
 		return slot
-	
+
 	def set(self, key, value):
 		slot = self.get_slot(key)
 		self.keys[slot] = key
 		self.values[slot] = value
-		
+
 	def get(self, key):
 		return self.values[self.get_slot(key)]
 
@@ -182,7 +190,7 @@ class HashTable:
 		return idx, p, q
 	def _ensure_capacity(self):
 		fill = self._count / self._size
-		
+
 		# expand or shrink?
 		if fill > self.ratio_expand:
 			self._size = self._size * 2 + 1
@@ -256,6 +264,6 @@ class HashTable:
 		while p:
 			yield p.key
 			p = p.entry_next
-			
+
 	def slots(self):
 		return ''.join(p and 'x' or '-' for p in self._buckets)
