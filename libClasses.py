@@ -20,12 +20,12 @@ class User:
 		self.__admin = admin
 		self.__password = password
 		self.__loans = 0
-		self.__books = {}		
+		self.__books = {}
 
-	
+
 	def __str__(self):
 		return "{} : {} -- Pendent Books: {}".format(self.key, self.name, self.loans)
-	
+
 	@property
 	def key(self):
 		return self.__key
@@ -65,13 +65,14 @@ class User:
 	@property
 	def books(self):
 		return self.__books
-	
+
 	@property
 	def booksList(self):
 		return self.books
 
 	@books.setter
-	def books(self, bookID, title):
+	def books(self, item):
+		bookID, title = item
 		self.__books[bookID] = title
 		return
 
@@ -83,7 +84,7 @@ class User:
 				if bookTitle == title:
 					bookID = bookKey
 		try:
-			self.__books.pop(bookID)
+			self.books.pop(bookID)
 			self.__loans -= 1
 		except:
 			return print("User didn't take this book!")
@@ -93,7 +94,7 @@ class User:
 			return print("Reached the max number of books' loan! Return one first.")
 		else:
 			self.books = (bookID, title)
-			self.loans += 1
+			self.__loans += 1
 
 
 class Book:
@@ -110,7 +111,7 @@ class Book:
 
 	def __str__(self):
 		return "{} : {} -- Copies:{} -- Borrowed Copies: {}".format(self.key, self.title, self.copies, self.borrowedCopies)
-	
+
 	@property
 	def key(self):
 		return self.__key
@@ -126,28 +127,32 @@ class Book:
 	@property
 	def borrowedCopies(self):
 		return self.__borrowedCopies
-	
+
 	@borrowedCopies.setter
 	def borrowedCopies(self, returned):
 		self.__borrowedCopies = returned
-		
+
 	@property
 	def availableCopies(self):
-		return self.__availableCopies	
-	
+		return self.__availableCopies
+
 	def __updateAvailableCopies(self):
-		self.availableCopies = self.copies - self.borrowedCopies
-		
+		self.__availableCopies = self.copies - self.borrowedCopies
+
 		if self.availableCopies > 0:
 			self.isAvailable = True
 		else:
 			self.isAvailable = False
-	
+
 	def returnBook(self):
 		self.borrowedCopies -= 1
 		self.__updateAvailableCopies()
 
-		
+	def withdrawBook(self):
+		self.borrowedCopies += 1
+		self.__updateAvailableCopies()
+
+
 
 
 	@property
@@ -173,7 +178,7 @@ class RWTNoneNode:
 	@property
 	def color(self):
 		return self.__color
-	
+
 	@color.setter
 	def color(self, color):
 		self.color = color
@@ -185,7 +190,7 @@ class RWTNoneNode:
 	@property
 	def father(self):
 		return self.__father
-	
+
 	@father.setter
 	def father(self, value):
 		self.__father = value
@@ -193,7 +198,7 @@ class RWTNoneNode:
 	@property
 	def leftSon(self):
 		return self.__leftSon
-	
+
 	@leftSon.setter
 	def leftSon(self, value):
 		self.leftSon = value
@@ -271,7 +276,7 @@ class RedWhiteTree():
 	@root.setter
 	def root(self, value):
 		self.__root = value
-	
+
 	def isEmpty(self):
 		if self.root is self.NoneNode:
 			return True
@@ -301,14 +306,14 @@ class RedWhiteTree():
 				father.leftSon = newNode
 			else:
 				father.rightSon = newNode
-		
+
 		newNode.leftSon = self.NoneNode
 		newNode.rightSon = self.NoneNode
-		newNode.color = "red"		
+		newNode.color = "red"
 		self.insertFix(newNode)
 		return
 
-	
+
 	def insertFix(self, node):
 		while node.father.color == "red":
 			if node.father == node.father.father.leftSon:
@@ -354,10 +359,10 @@ class RedWhiteTree():
 			node.father.leftSon = node2
 		else:
 			node.father.rightSon = node2
-		
+
 		node2.father = node.father
 
-	
+
 	def removeNode(self, key):
 		node = self.searchKey(key)
 
@@ -381,12 +386,12 @@ class RedWhiteTree():
 				self.transplantNode(swap, swap.rightSon)
 				swap.rightSon = node.rightSon
 				swap.rightSon.father = swap
-		
+
 			self.transplantNode(node, swap)
 			swap.leftSon = node.leftSon
 			swap.leftSon.father = swap
 			swap.color = node.color
-		
+
 		if swapOriginColor == "white":
 			self.removesFix(swap2)
 
@@ -413,15 +418,15 @@ class RedWhiteTree():
 						swap.color = "red"
 
 						self.rotateRight(swap)
-
 						swap = node.father.rightSon
-						swap.color = node.father.color
-						node.father.color = "white"
-						swap.rightSon.color = "white"
-						
-						self.rotateLeft(node.father)
-						
-						node = self.root
+
+					swap.color = node.father.color
+					node.father.color = "white"
+					swap.rightSon.color = "white"
+
+					self.rotateLeft(node.father)
+
+					node = self.root
 			else:
 				swap = node.father.leftSon
 
@@ -443,13 +448,13 @@ class RedWhiteTree():
 						swap.color = "red"
 
 						self.rotateLeft(swap)
-
 						swap = node.father.leftSon
-						swap.color = node.father.color
-						node.father.color = "white"
-						swap.leftSon.color = "white"
-						
-						self.rotateRight(node.father)
+
+					swap.color = node.father.color
+					node.father.color = "white"
+					swap.leftSon.color = "white"
+					self.rotateRight(node.father)
+					node = self.root
 
 		node.color = "white"
 
@@ -466,7 +471,7 @@ class RedWhiteTree():
 					node = node.rightSon
 				else:
 					return node
-			
+
 			return self.NoneNode
 
 	def searchKey(self, key):

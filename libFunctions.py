@@ -50,7 +50,8 @@ def loadBooksDatabase():
 		booksFileContent = booksFile.readlines()
 
 	for item  in booksFileContent:
-		book = Book(*item.split())
+		title, copies = item.split()
+		book = Book(title, int(copies))
 		booksBase.insertNode(book)
 	return booksBase
 
@@ -70,7 +71,8 @@ def loadUsersDatabase():
 
 
 def addUser(usersBase):
-	userName = input("\nNome: ")
+	cleanScreen()
+	userName = input("Nome: ")
 	userPassword = input("Senha: ")
 	admin = input("Admin: (y/N)  ")
 	if admin.lower() == "y":
@@ -80,14 +82,19 @@ def addUser(usersBase):
 	user = User(userName, userPassword, admin=admin)
 	userID = user.key
 	cleanScreen()
-	pauseForRead("\nUser \033[91m\"{}\"\033[0m registred at the id \033[91m\"{}\"\033[0m".format(userName, userID), time=3)
 	usersBase.insertNode(user)
+	pauseForRead("\nUser \033[91m\"{}\"\033[0m registred at the id \033[91m\"{}\"\033[0m".format(userName, userID), time=3)
 
 
 def addBook(booksBase):
 	cleanScreen()
-	bookTitle = input("Titulo do livro: ")
-	book = Book(bookTitle)
+	bookTitle = input("Titulo do livro: (0 - Exit)   ")
+
+	if bookTitle == "0":
+		return
+
+	bookCopies = input("Number of copies: ")
+	book = Book(bookTitle, bookCopies)
 	bookID = book.key
 	try:
 		if booksBase.searchValue(book) is not booksBase.NoneNode:
@@ -109,9 +116,10 @@ def borrowedBooks(usersBase, loggedUser=None):
 	if loggedUser is None:
 		return pauseForRead("No user logged.")
 
+	cleanScreen()
 	print("\n--------------------  LIVROS  --------------------\n")
 	for bookID, bookTitle in loggedUser.books.items():
-		print("{} -- {}".format(bookID, bookTitle))
+		print("{} : {}".format(bookID, bookTitle))
 	print("\n-----------------------  X  -----------------------")
 	input("Press Enter to return...")
 
@@ -129,7 +137,7 @@ def withdrawBook(usersBase, booksBase, loggedUser):
 		bookID = int(input("Book ID: (0 - exit)   "))
 		if bookID == 0:
 			return
-		book = booksBase.searchKey(bookID)
+		book = booksBase.searchKey(bookID).data
 		if book is booksBase.NoneNode:
 			pauseForRead("Invalid book ID. Try again.")
 		else:
@@ -140,7 +148,7 @@ def withdrawBook(usersBase, booksBase, loggedUser):
 			pauseForRead("\nYou have passed loans' limit.")
 		else:
 			user.withdrawBook(book.key, book.title)
-			book.copies -= 1
+			book.withdrawBook()
 			pauseForRead("\nBook withdrawn.")
 	else:
 		pauseForRead("\nUnavailable book.")
@@ -154,17 +162,21 @@ def returnBook(usersBase, booksBase, loggedUser):
 
 	bookID = -1
 	while bookID != 0:
-		print("\nSelect the book to return (0 - exit)")
-
+		cleanScreen()
+		print("\n{:-^30}\n".format("  Books  "))
 		for bookCode, bookTitle in user.books.items():
 			print("{:d} : {:s}".format(bookCode, bookTitle))
+		print()
 
-		bookID = int(input("Book ID: "))
+		print("\nSelect the book to return ")
+
+
+		bookID = int(input("Book ID to return: (0 - exit)   "))
 
 		if bookID == 0:
 			return
 
-		book = booksBase.searchKey(bookID)
+		book = booksBase.searchKey(bookID).data
 		if book is booksBase.NoneNode:
 			pauseForRead("\nInvalid book ID. Try again.")
 			continue
@@ -181,7 +193,7 @@ def removeUser(usersBase):
 		cleanScreen()
 		print("\n{:-^30}\n".format("  Users  "))
 		print(usersBase)
-		
+
 		userKey = int(input("User ID: (0 - Exit)   "))
 		if userKey == 0:
 			return
@@ -234,6 +246,7 @@ def removeBook(booksBase):
 
 def userLogin(usersBase):
 	while True:
+		cleanScreen()
 		userKey = int(input("\nUser ID: (0 - Exit)   "))
 		if userKey == 0:
 			return
@@ -250,9 +263,9 @@ def userLogin(usersBase):
 			break
 
 	while True:
-		password = int(input("\nPassword: (0 - Exit)   "))
+		password = input("\nPassword: (0 - Exit)   ")
 
-		if password == 0:
+		if password == "0":
 			return
 
 		if password == user.password:
@@ -260,7 +273,6 @@ def userLogin(usersBase):
 			return userMenu(user, usersBase, booksBase)
 		else:
 			pauseForRead("Invalid password!", end="\r")
-			print("\r")
 
 def adminLogin(usersBase):
 	while True:
@@ -283,17 +295,16 @@ def adminLogin(usersBase):
 			break
 
 	while True:
-		password = int(input("Password: (0 - Exit)   "))
+		password = input("Password: (0 - Exit)   ")
 
-		if password == 0:
+		if password == "0":
 			return
 
 		if password == user.password:
-			pauseForRead("ADMIN LOGGED.")
+			pauseForRead("\nADMIN LOGGED.")
 			return adminMenu(user, booksBase)
 		else:
 			pauseForRead("Invalid password!", end="\r")
-			
 
 
 
