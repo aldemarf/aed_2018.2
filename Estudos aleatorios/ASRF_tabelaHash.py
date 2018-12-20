@@ -90,27 +90,72 @@ class HashTable:
 		hashValue, item = entry
 		self.__table[hashValue] = item
 
-	def sweepBucket(self, item, key):
-		while item:
-			if key == item.key:
-				return item.pair
-			item = item.next()
+	def sweepBucket(self, bucketItem, key):
+		while bucketItem:
+			if key == bucketItem.key:
+				return bucketItem.pair
+			bucketItem = bucketItem.next()
 		return None
+
+	def last(self, bucketItem):
+		if bucketItem is None:
+			raise IndexError("Empty bucket!")
+
+		while bucketItem:
+			previous, bucketItem = bucketItem, bucketItem.next()
+
+		return previous
 
 	def get(self, key):
 		hashKey = self.__9Hash__(key)
-		bucket = self.table[hashKey]
-		return self.sweepBucket(bucket, key)
+		bucketItem = self.table[hashKey]
+		return self.sweepBucket(bucketItem, key)
 
 
 	def insert(self, key, value):
 		item = HashChainUnity(key, value)
-		self.table = (self.__9Hash__(key), item)
+		bucketAddress = self.__9Hash__(key)
 
-hashTab = HashTable(60)
+		if self.table[bucketAddress] is None:
+			self.table = (bucketAddress, item)
+		else:
+			last = self.last(self.table[bucketAddress])
+			last.nextItem = item
+
+
+	def remove(self, key):
+		hashKey = self.__9Hash__(key)
+		bucketItem = self.table[hashKey]
+
+		if bucketItem is None:
+			raise IndexError
+
+		previous = None
+
+		while bucketItem:
+			if key == bucketItem.key:
+				break
+			previous, bucketItem = bucketItem, bucketItem.next()
+
+		if not bucketItem:
+			raise IndexError("Key not found!")
+		elif previous is None:
+			self.table = (hashKey, bucketItem.next())
+		else:
+			previous.nextItem = bucketItem.next()
+		return bucketItem.pair
+
+
+hashTab = HashTable()
 hashTab.insert(123, "ABC")
+hashTab.insert(33, "ACD")
+hashTab.insert(24, "AC")
+# print(hashTab.table)
+print(hashTab.get(123))
 
-print(hashTab.get(1234189))
+print(hashTab.remove(24))
+
+print(hashTab.get(24))
 
 
 ################################################################
