@@ -1,3 +1,5 @@
-*.pdf
+ASRF_RELATORIO_PROJETO.pdf
 /__pycache__/
 *.zip
+*/.ipynb_checkpoints/*
+/Estudos aleatorios/.ipynb_checkpoints/
